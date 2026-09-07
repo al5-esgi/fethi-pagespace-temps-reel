@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Editeur collaboratif</title>
+  <style>
+    body { font: 14px system-ui, sans-serif; margin: 1.5rem; max-width: 780px; }
+    header { display: flex; gap: 1rem; align-items: baseline; }
+    select, button { font: inherit; padding: 2px 6px; }
+    textarea { width: 100%; height: 40vh; font: 14px ui-monospace, monospace; margin-top: .5rem; }
+    .hint { color: #666; }
+    #status { font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Editeur collaboratif</h1>
+    <label>document :
+      <select id="doc"></select>
+    </label>
+    <span id="status">deconnecte</span>
+  </header>
+  <p class="hint">
+    Ouvrez cette page dans 2 onglets. Tapez dans l'un, l'autre se met a jour.
+    Essayez de choisir un document different dans chaque onglet : vous editez quand meme
+    le meme texte (le stub ignore le document). Rechargez un onglet : la position du curseur
+    est perdue et vous ne voyez jamais le curseur de l'autre.
+  </p>
+  <textarea id="editor" spellcheck="false"></textarea>
+
+  <script>
+    const me = 'u' + Math.floor(Math.random() * 1000)
+    const editor = document.getElementById('editor')
+    const status = document.getElementById('status')
+    const docSel = document.getElementById('doc')
+    let applyingRemote = false
+    let last = ''
+
+    fetch('/api/docs').then((r) => r.json()).then((docs) => {
+      docSel.innerHTML = docs.map((d) => `<option value="${d.id}">${d.title}</option>`).join('')
+    })
+
+    const ws = new WebSocket(`ws://${location.host}`)
+    ws.onopen = () => (status.textContent = 'connecte ' + me)
+    ws.onclose = () => (status.textContent = 'deconnecte')
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data)
+      if (msg.type === 'state' && msg.state.text !== editor.value) {
+        applyingRemote = true
+        const pos = editor.selectionStart
+        editor.value = msg.state.text
+        editor.selectionStart = editor.selectionEnd = Math.min(pos, editor.value.length)
+        last = editor.value
+        applyingRemote = false
+      }
+    }
+
+    // Diff naif : on compare avant/apres et on envoie une insertion ou une suppression.
+    editor.addEventListener('input', () => {
+      if (applyingRemote) return
+      const now = editor.value
+      const prefix = commonPrefix(last, now)
+      if (now.length > last.length) {
+        ws.send(JSON.stringify({
+          kind: 'insert', offset: prefix, text: now.slice(prefix, prefix + (now.length - last.length)),
+          by: me, docId: docSel.value,
+        }))
+      } else if (now.length < last.length) {
+        ws.send(JSON.stringify({
+          kind: 'delete', offset: prefix, length: last.length - now.length, by: me, docId: docSel.value,
+        }))
+      }
+      last = now
+    })
+
+    function commonPrefix(a, b) {
+      let i = 0
+      while (i < a.length && i < b.length && a[i] === b[i]) i++
+      return i
+    }
+  </script>
+</body>
+</html>
