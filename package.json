@@ -8,6 +8,7 @@
     "start": "tsx src/server.ts",
     "seed": "tsx src/seed.ts --print",
     "scenario": "tsx src/realtime/piege.scenario.ts",
+    "s3:token": "tsx src/realtime/make-token.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

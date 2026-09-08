@@ -41,7 +41,9 @@
       docSel.innerHTML = docs.map((d) => `<option value="${d.id}">${d.title}</option>`).join('')
     })
 
-    const ws = new WebSocket(`ws://${location.host}`)
+    const token = new URLSearchParams(location.search).get('token') ?? ''
+    const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws'
+    const ws = new WebSocket(`${wsProtocol}://${location.host}?token=${encodeURIComponent(token)}`)
     ws.onopen = () => (status.textContent = 'connecte ' + me)
     ws.onclose = () => (status.textContent = 'deconnecte')
     ws.onmessage = (e) => {
