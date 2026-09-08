@@ -2,7 +2,7 @@ import Fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { registerRoutes } from './rest.ts'
+import { publishOperation, registerRoutes } from './rest.ts'
 import { createStore, parseClientOp, applyNaive, type ClientOp } from './store.ts'
 import { startNaiveStub } from './realtime/naive-stub.ts'
 
@@ -22,6 +22,9 @@ console.log(`editeur-collaboratif : http://localhost:${PORT}`)
 startNaiveStub<ClientOp>(app.server, {
   fullState: () => ({ text: store.naive.bloc.text }), // pas de curseurs (defaut : etape 5)
   parseInput: parseClientOp,
-  applyInput: (op) => applyNaive(store, op),
+  applyInput: (op) => {
+    applyNaive(store, op)
+    publishOperation(op)
+  },
 })
 console.log('couche temps reel : stub naif (voir src/realtime/naive-stub.ts)')

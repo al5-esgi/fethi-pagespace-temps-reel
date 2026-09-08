@@ -1,10 +1,12 @@
 # ADR-1 : technique de push
 
 ## Statut
-A definir (propose etape 2, accepte etape 4)
+Proposé
 
 ## Contexte
-<Le flux principal de ce projet et son sens : serveur -> client seul, ou bidirectionnel ?>
+L'editeur collaboratif possede un flux principal bidirectionnel : les clients envoient leurs
+operations d'edition au serveur, qui les diffuse ensuite aux autres utilisateurs. Un flux
+secondaire permet egalement de consulter l'historique des operations en lecture seule.
 
 ## Options envisagees
 - Long-polling
@@ -13,10 +15,18 @@ A definir (propose etape 2, accepte etape 4)
 - WebRTC
 
 ## Decision
-<La technique retenue et pourquoi elle convient a ce projet.>
+WebSocket est envisage pour le flux principal, car l'edition necessite une communication
+bidirectionnelle. SSE est utilise pour diffuser l'historique des operations du serveur vers les
+clients avec un mecanisme de rattrapage base sur `Last-Event-ID`.
 
 ## Pourquoi pas WebRTC pour le flux principal
-<A remplir etape 2, a confirmer etape 9 une fois WebRTC pratique.>
+Le serveur doit controler, ordonner et conserver les operations, ce qui rend une communication
+principalement pair-a-pair inadaptee.
 
 ## Consequences
-<Ce que ce choix permet, ce qu'il ne permet pas.>
+SSE offre un flux simple et rattrapable en lecture seule, mais ne permet pas aux clients d'envoyer
+leurs modifications. WebSocket reste donc necessaire pour le flux d'edition bidirectionnel.
+
+## Preuve du rattrapage SSE
+
+![Test Last-Event-ID](../captures/tp2-sse-rattrapage.png)
