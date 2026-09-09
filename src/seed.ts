@@ -5,10 +5,10 @@ import { createDocument, recordAndApply, type Document, type Operation } from '.
 export function buildSeed(): Map<string, Document> {
   const docs = new Map<string, Document>()
 
-  const notes = createDocument('doc-notes', 'Notes de reunion', 'Ordre du jour :\n- ')
+  const notes = createDocument('doc-notes', 'Notes de reunion', 'Ordre du jour :\n- ', 'demo-user')
   docs.set(notes.id, notes)
 
-  const brief = createDocument('doc-brief', 'Brief produit', '')
+  const brief = createDocument('doc-brief', 'Brief produit', '', 'alice')
   const phrases = [
     'Le produit ',
     'permet de ',

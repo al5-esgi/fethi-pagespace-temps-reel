@@ -18,6 +18,7 @@ export interface Bloc {
 export interface Document {
   id: string
   title: string
+  ownerId: string
   blocs: Bloc[]
   history: Operation[]
 }
@@ -35,8 +36,13 @@ export function applyOperation(bloc: Bloc, op: Operation): void {
   }
 }
 
-export function createDocument(id: string, title: string, initial = ''): Document {
-  return { id, title, blocs: [{ id: `${id}-b1`, text: initial }], history: [] }
+export function createDocument(
+  id: string,
+  title: string,
+  initial = '',
+  ownerId = 'demo-user',
+): Document {
+  return { id, title, ownerId, blocs: [{ id: `${id}-b1`, text: initial }], history: [] }
 }
 
 export function recordAndApply(doc: Document, op: Operation): void {

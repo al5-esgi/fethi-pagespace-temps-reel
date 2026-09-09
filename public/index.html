@@ -22,13 +22,12 @@
     <span id="status">deconnecte</span>
   </header>
   <p class="hint">
-    Ouvrez cette page dans 2 onglets. Tapez dans l'un, l'autre se met a jour.
-    Essayez de choisir un document different dans chaque onglet : vous editez quand meme
-    le meme texte (le stub ignore le document). Rechargez un onglet : la position du curseur
-    est perdue et vous ne voyez jamais le curseur de l'autre.
+    Ouvrez cette page dans 2 onglets sur le meme document : les operations sont partagees dans
+    sa room. Un utilisateur ne peut rejoindre que les documents dont il est proprietaire.
   </p>
   <textarea id="editor" spellcheck="false"></textarea>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     const me = 'u' + Math.floor(Math.random() * 1000)
     const editor = document.getElementById('editor')
@@ -36,44 +35,95 @@
     const docSel = document.getElementById('doc')
     let applyingRemote = false
     let last = ''
+    editor.disabled = true
 
     fetch('/api/docs').then((r) => r.json()).then((docs) => {
       docSel.innerHTML = docs.map((d) => `<option value="${d.id}">${d.title}</option>`).join('')
+      if (socket.connected) joinSelectedDocument()
     })
 
     const token = new URLSearchParams(location.search).get('token') ?? ''
-    const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws'
-    const ws = new WebSocket(`${wsProtocol}://${location.host}?token=${encodeURIComponent(token)}`)
-    ws.onopen = () => (status.textContent = 'connecte ' + me)
-    ws.onclose = () => (status.textContent = 'deconnecte')
-    ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data)
-      if (msg.type === 'state' && msg.state.text !== editor.value) {
-        applyingRemote = true
-        const pos = editor.selectionStart
-        editor.value = msg.state.text
-        editor.selectionStart = editor.selectionEnd = Math.min(pos, editor.value.length)
-        last = editor.value
-        applyingRemote = false
+    const socket = io({ auth: { token } })
+
+    socket.on('connect', () => {
+      status.textContent = 'connecte ' + me
+      joinSelectedDocument()
+    })
+    socket.on('disconnect', () => {
+      status.textContent = 'deconnecte'
+      editor.disabled = true
+    })
+    socket.on('connect_error', (error) => {
+      status.textContent = 'refuse : ' + error.message
+      editor.disabled = true
+    })
+    socket.io.on('reconnect', (attempt) => {
+      console.log('reconnecte apres', attempt, 'tentative(s)')
+    })
+
+    socket.on('snapshot', (snapshot) => {
+      if (snapshot.docId !== docSel.value) return
+      applyingRemote = true
+      editor.value = snapshot.text
+      last = snapshot.text
+      applyingRemote = false
+    })
+
+    socket.on('op', (op) => {
+      if (op.docId !== docSel.value) return
+      applyingRemote = true
+      const at = Math.max(0, Math.min(op.offset, editor.value.length))
+      if (op.kind === 'insert') {
+        editor.value = editor.value.slice(0, at) + (op.text ?? '') + editor.value.slice(at)
+      } else {
+        const end = Math.max(at, Math.min(at + (op.length ?? 0), editor.value.length))
+        editor.value = editor.value.slice(0, at) + editor.value.slice(end)
       }
+      last = editor.value
+      applyingRemote = false
+    })
+
+    function joinSelectedDocument() {
+      if (!socket.connected || !docSel.value) return
+      editor.disabled = true
+      socket.timeout(5000).emit('join', `doc:${docSel.value}`, (error, ok, reason) => {
+        if (error) {
+          status.textContent = 'join : timeout'
+          return
+        }
+        if (!ok) {
+          status.textContent = 'refuse : ' + reason
+          return
+        }
+        status.textContent = 'connecte a doc:' + docSel.value
+        editor.disabled = false
+      })
     }
+
+    docSel.addEventListener('change', joinSelectedDocument)
 
     // Diff naif : on compare avant/apres et on envoie une insertion ou une suppression.
     editor.addEventListener('input', () => {
       if (applyingRemote) return
       const now = editor.value
       const prefix = commonPrefix(last, now)
+      let operation = null
       if (now.length > last.length) {
-        ws.send(JSON.stringify({
+        operation = {
           kind: 'insert', offset: prefix, text: now.slice(prefix, prefix + (now.length - last.length)),
           by: me, docId: docSel.value,
-        }))
+        }
       } else if (now.length < last.length) {
-        ws.send(JSON.stringify({
+        operation = {
           kind: 'delete', offset: prefix, length: last.length - now.length, by: me, docId: docSel.value,
-        }))
+        }
       }
       last = now
+      if (operation) {
+        socket.timeout(5000).emit('op', operation, (error, ok, reason) => {
+          if (error || !ok) console.error('operation refusee :', reason ?? 'timeout')
+        })
+      }
     })
 
     function commonPrefix(a, b) {
