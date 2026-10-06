@@ -34,6 +34,10 @@ export function parseClientOp(raw: unknown): ClientOp | null {
   const o = raw as Record<string, unknown>
   if (o.kind !== 'insert' && o.kind !== 'delete') return null
   if (typeof o.offset !== 'number') return null
+  // Le canal legacy ne doit pas contourner les limites des lots CRDT.
+  if (o.kind === 'insert' && (typeof o.text !== 'string' || o.text.length > 512)) return null
+  if (o.kind === 'delete' && (typeof o.length !== 'number' ||
+      !Number.isSafeInteger(o.length) || o.length < 0 || o.length > 512)) return null
   return {
     kind: o.kind,
     offset: o.offset,

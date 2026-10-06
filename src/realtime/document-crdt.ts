@@ -143,7 +143,7 @@ export class DocumentCrdt {
 
 /** Validation des paquets reseau : un lot est entierement valide avant toute mutation. */
 export function parseCharOps(raw: unknown): CharOp[] | null {
-  if (!Array.isArray(raw) || raw.length === 0 || raw.length > 10_000) return null
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > 512) return null
   const result: CharOp[] = []
   for (const value of raw) {
     if (!value || typeof value !== 'object') return null

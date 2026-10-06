@@ -10,6 +10,7 @@ import { RateLimiter } from './security-helpers.ts'
 
 export function registerClusterSocket(io: Server, socket: Socket, shared: RedisState, metrics?: RealtimeMetrics): void {
   const limiter = new RateLimiter(20)
+  const ephemeralLimiter = new RateLimiter(60)
   let sequence = 0
   let tasks = Promise.resolve()
   const enqueue = (work: () => Promise<void>, onError?: (reason: string) => void) => {
@@ -23,6 +24,7 @@ export function registerClusterSocket(io: Server, socket: Socket, shared: RedisS
 
   socket.on('join', (room: unknown, ack: JoinAck) => {
     if (typeof ack !== 'function') return
+    if (!ephemeralLimiter.hit()) { ack(false, 'rate limit exceeded'); socket.disconnect(true); return }
     enqueue(async () => {
       if (typeof room !== 'string' || !room.startsWith('doc:')) return void ack(false, 'room non autorisee')
       const previousRoom = socket.data.room as string | undefined
@@ -109,6 +111,7 @@ export function registerClusterSocket(io: Server, socket: Socket, shared: RedisS
   })
 
   socket.on('cursor:move', (raw: unknown) => {
+    if (!ephemeralLimiter.hit()) { socket.disconnect(true); return }
     if (!raw || typeof raw !== 'object') return
     const cursor = raw as CursorState
     if (![cursor.position, cursor.selectionStart, cursor.selectionEnd].every(Number.isSafeInteger)) return
@@ -138,6 +141,7 @@ export function registerClusterSocket(io: Server, socket: Socket, shared: RedisS
 
   socket.once('disconnect', () => {
     limiter.stop()
+    ephemeralLimiter.stop()
     enqueue(() => shared.disconnect(socket.id))
   })
 }

@@ -1,0 +1,8 @@
+{
+  "sast": { "blockLevels": ["error"] },
+  "secrets": { "maximum": 0 },
+  "npm": { "blockSeverities": ["high", "critical"] },
+  "osv": { "minimumCvss": 7, "blockUnknown": true },
+  "image": { "blockSeverities": ["HIGH", "CRITICAL"] },
+  "zap": { "minimumRisk": 2 }
+}

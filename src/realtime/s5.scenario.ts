@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { setTimeout as delay } from 'node:timers/promises'
-import jwt from 'jsonwebtoken'
 import { io as connectSocket, type Socket } from 'socket.io-client'
 import { createStore } from '../store.ts'
-import { SECRET } from './security-helpers.ts'
+import { signAccessToken } from './security-helpers.ts'
 import { startSocketIoServer } from './socketio-server.ts'
 
 interface Member {
@@ -85,7 +84,7 @@ try {
   const url = `http://127.0.0.1:${address.port}`
 
   async function connect(userId: string, clientId: string, invalidToken = false): Promise<Socket> {
-    const token = invalidToken ? 'invalide' : jwt.sign({ sub: userId }, SECRET, { expiresIn: '1h' })
+    const token = invalidToken ? 'invalide' : signAccessToken(userId)
     const socket = connectSocket(url, {
       autoConnect: false,
       transports: ['websocket'],

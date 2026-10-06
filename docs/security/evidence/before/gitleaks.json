@@ -1,0 +1,23 @@
+[
+  {
+    "RuleID": "pagespace-jwt-literal",
+    "Description": "Cle JWT litterale dans le code applicatif",
+    "StartLine": 49,
+    "EndLine": 49,
+    "StartColumn": 2,
+    "EndColumn": 35,
+    "Match": "export const SECRET = 'REDACTED'",
+    "Secret": "REDACTED",
+    "File": "src/realtime/security-helpers.ts",
+    "SymlinkFile": "",
+    "Commit": "09f2968acf2af773b25f46d74748b05d92c3a962",
+    "Link": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/blob/09f2968acf2af773b25f46d74748b05d92c3a962/src/realtime/security-helpers.ts#L49",
+    "Entropy": 3.321928,
+    "Author": "Fethi",
+    "Email": "fsedjai@dev-id.fr",
+    "Date": "2026-09-07T08:27:02Z",
+    "Message": "chore: template du sujet, constat du stub, choix de push",
+    "Tags": [],
+    "Fingerprint": "09f2968acf2af773b25f46d74748b05d92c3a962:src/realtime/security-helpers.ts:pagespace-jwt-literal:49"
+  }
+]

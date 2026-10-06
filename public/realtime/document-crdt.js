@@ -133,7 +133,7 @@ export class DocumentCrdt {
 }
 /** Validation des paquets reseau : un lot est entierement valide avant toute mutation. */
 export function parseCharOps(raw) {
-    if (!Array.isArray(raw) || raw.length === 0 || raw.length > 10_000)
+    if (!Array.isArray(raw) || raw.length === 0 || raw.length > 512)
         return null;
     const result = [];
     for (const value of raw) {

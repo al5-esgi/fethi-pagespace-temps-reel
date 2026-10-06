@@ -1,10 +1,10 @@
 import type { ServerResponse } from 'node:http'
 import { randomUUID } from 'node:crypto'
 import type { FastifyInstance } from 'fastify'
-import jwt from 'jsonwebtoken'
 import { createDocument, renderText, type Document } from './domain.ts'
 import { DEMO_PROFILES, findDemoProfile } from './profiles.ts'
-import { SECRET } from './realtime/security-helpers.ts'
+import { DEMO_AUTH_ENABLED, signAccessToken } from './realtime/security-helpers.ts'
+import { canAccessDocument, readAccessibleDocument, requestIdentity } from './security.ts'
 import type { ClientOp, Store } from './store.ts'
 import type { RedisState } from './realtime/redis-state.ts'
 
@@ -15,7 +15,7 @@ export interface SseEvent {
 
 const MAX_BUFFER = 100
 const events: SseEvent[] = []
-const clients = new Set<ServerResponse>()
+const clients = new Map<ServerResponse, string>()
 let nextId = 1
 
 function record(data: unknown): SseEvent {
@@ -40,8 +40,8 @@ export function publishOperation(op: ClientOp): void {
     by: op.by,
   })
 
-  for (const client of clients) {
-    if (!client.writableEnded) send(client, event)
+  for (const [client, docId] of clients) {
+    if (!client.writableEnded && docId === op.docId) send(client, event)
   }
 }
 
@@ -52,7 +52,10 @@ export function relaySharedEvents(batch: SseEvent[]): void {
     events.sort((a, b) => a.id - b.id)
     while (events.length > MAX_BUFFER) events.shift()
     nextId = Math.max(nextId, event.id + 1)
-    for (const client of clients) if (!client.writableEnded) send(client, event)
+    const docId = (JSON.parse(event.data) as { docId: string }).docId
+    for (const [client, subscribedId] of clients) {
+      if (!client.writableEnded && subscribedId === docId) send(client, event)
+    }
   }
 }
 
@@ -65,13 +68,21 @@ export function registerRoutes(app: FastifyInstance, store: Store, shared?: Redi
   }
 
   app.get('/api/stream', async (req, reply) => {
+    const identity = requestIdentity(req)
+    if (!identity) return reply.code(401).send({ error: 'authentification requise' })
+    const docId = (req.query as { docId?: string }).docId
+    if (!docId || !await readAccessibleDocument(store, shared, docId, identity.sub)) {
+      return reply.code(403).send({ error: 'document non autorise' })
+    }
     const sharedBuffer = shared ? await shared.streamBuffer() : null
     reply.hijack()
     const res = reply.raw
-
+    for (const [name, value] of Object.entries(reply.getHeaders())) {
+      if (value !== undefined) res.setHeader(name, value)
+    }
     res.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-store',
       Connection: 'keep-alive',
     })
 
@@ -88,23 +99,27 @@ export function registerRoutes(app: FastifyInstance, store: Store, shared?: Redi
     }
 
     for (const event of buffered) {
-      if (event.id > lastEventId) send(res, event)
+      if (event.id > lastEventId && (JSON.parse(event.data) as { docId: string }).docId === docId) send(res, event)
     }
 
-    clients.add(res)
+    clients.set(res, docId)
+    const expiry = setTimeout(() => res.end(), Math.max(0, identity.exp * 1000 - Date.now()))
     const heartbeat = setInterval(() => {
       if (!res.writableEnded) res.write(': heartbeat\n\n')
     }, 15_000)
 
-    req.raw.on('close', () => {
+    res.on('close', () => {
       clearInterval(heartbeat)
+      clearTimeout(expiry)
       clients.delete(res)
     })
   })
 
-  app.get('/api/docs', async () => {
+  app.get('/api/docs', async (req, reply) => {
+    const identity = requestIdentity(req)
+    if (!identity) return reply.code(401).send({ error: 'authentification requise' })
     if (shared) await shared.syncStore()
-    return [...store.documents.values()].map((d) => ({
+    return [...store.documents.values()].filter((d) => canAccessDocument(d, identity.sub)).map((d) => ({
       id: d.id,
       title: d.title,
       ownerId: d.ownerId,
@@ -112,42 +127,58 @@ export function registerRoutes(app: FastifyInstance, store: Store, shared?: Redi
     }))
   })
 
-  app.get('/api/profiles', async () => DEMO_PROFILES)
+  app.get('/api/profiles', async (_req, reply) => DEMO_AUTH_ENABLED
+    ? DEMO_PROFILES : reply.code(404).send({ error: 'mode demo desactive' }))
 
-  app.post('/api/auth/demo', async (req, reply) => {
+  app.post('/api/auth/demo', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } }, schema: {
+    body: { type: 'object', required: ['profileId'], additionalProperties: false,
+      properties: { profileId: { type: 'string', maxLength: 100 } } },
+  } }, async (req, reply) => {
+    if (!DEMO_AUTH_ENABLED) return reply.code(404).send({ error: 'mode demo desactive' })
     const body = (req.body ?? {}) as { profileId?: string }
     const profile = body.profileId ? findDemoProfile(body.profileId) : undefined
     if (!profile) return reply.code(400).send({ error: 'profil inconnu' })
 
-    const token = jwt.sign({ sub: profile.id }, SECRET, { expiresIn: '4h' })
+    const token = signAccessToken(profile.id)
     return { token, profile }
   })
 
   app.get('/api/docs/:id', async (req, reply) => {
+    const identity = requestIdentity(req)
+    if (!identity) return reply.code(401).send({ error: 'authentification requise' })
     const id = (req.params as { id: string }).id
-    const doc = shared ? (await shared.readDocument(id))?.document : store.documents.get(id)
-    if (!doc) return reply.code(404).send({ error: 'document inconnu' })
+    const doc = await readAccessibleDocument(store, shared, id, identity.sub)
+    if (!doc) return reply.code(403).send({ error: 'document non autorise' })
     return { id: doc.id, title: doc.title, text: renderText(doc) }
   })
 
   app.get('/api/docs/:id/history', async (req, reply) => {
+    const identity = requestIdentity(req)
+    if (!identity) return reply.code(401).send({ error: 'authentification requise' })
     const id = (req.params as { id: string }).id
-    const doc = shared ? (await shared.readDocument(id))?.document : store.documents.get(id)
-    if (!doc) return reply.code(404).send({ error: 'document inconnu' })
+    const doc = await readAccessibleDocument(store, shared, id, identity.sub)
+    if (!doc) return reply.code(403).send({ error: 'document non autorise' })
     return doc.history
   })
 
   app.get('/api/docs/:id/snapshot', async (req, reply) => {
+    const identity = requestIdentity(req)
+    if (!identity) return reply.code(401).send({ error: 'authentification requise' })
     const id = (req.params as { id: string }).id
-    const doc = shared ? (await shared.readDocument(id))?.document : store.documents.get(id)
-    if (!doc) return reply.code(404).send({ error: 'document inconnu' })
+    const doc = await readAccessibleDocument(store, shared, id, identity.sub)
+    if (!doc) return reply.code(403).send({ error: 'document non autorise' })
     return { id: doc.id, blocs: doc.blocs, version: doc.history.length }
   })
 
-  app.post('/api/docs', async (req, reply) => {
+  app.post('/api/docs', { schema: {
+    body: { type: 'object', required: ['title'], additionalProperties: false,
+      properties: { title: { type: 'string', minLength: 1, maxLength: 200 } } },
+  } }, async (req, reply) => {
+    const identity = requestIdentity(req)
+    if (!identity) return reply.code(401).send({ error: 'authentification requise' })
     const body = (req.body ?? {}) as { title?: string }
     if (!body.title) return reply.code(400).send({ error: 'title requis' })
-    const doc: Document = createDocument(`doc-${randomUUID()}`, body.title)
+    const doc: Document = createDocument(`doc-${randomUUID()}`, body.title, '', identity.sub)
     store.documents.set(doc.id, doc)
     if (shared) await shared.ensureDocument(doc)
     return reply.code(201).send({ id: doc.id, title: doc.title })

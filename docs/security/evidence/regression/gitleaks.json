@@ -1,0 +1,22 @@
+[
+ {
+  "RuleID": "pagespace-jwt-literal",
+  "Description": "Cle JWT litterale dans le code applicatif",
+  "StartLine": 2,
+  "EndLine": 2,
+  "StartColumn": 2,
+  "EndColumn": 59,
+  "Match": "export const SECRET = 'REDACTED'",
+  "Secret": "REDACTED",
+  "File": "src/security-regression.ts",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 3.6049225,
+  "Author": "",
+  "Email": "",
+  "Date": "",
+  "Message": "",
+  "Tags": [],
+  "Fingerprint": "src/security-regression.ts:pagespace-jwt-literal:2"
+ }
+]

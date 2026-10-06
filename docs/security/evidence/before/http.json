@@ -1,0 +1,66 @@
+{
+  "at": "2026-10-06T10:31:33.604202+00:00",
+  "commit": "cdc7fec",
+  "target": "http://localhost:3101",
+  "checks": {
+    "/api/docs": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "x-editor-instance": "A",
+        "content-length": "840",
+        "Date": "Tue, 06 Oct 2026 10:31:33 GMT",
+        "Connection": "close"
+      },
+      "sample": "[{\"id\":\"doc-notes\",\"title\":\"Notes de reunion\",\"ownerId\":\"demo-user\",\"collaboratorIds\":[\"alice\",\"bob\"]},{\"id\":\"doc-brief\",\"title\":\"Brief produit\",\"ownerId\":\"alice\",\"collaboratorIds\":[]},{\"id\":\"doc-muwgtuub\",\"title\":\"Validation TP7 2026-10-06T09:17:44.668Z\",\"ownerId\":\"demo-user\",\"collaboratorIds\":[]},{\"id\":\"doc-muwgy9m5\",\"title\":\"Charge TP7 2026-10-06T09:21:10.442Z\",\"ownerId\":\"demo-user\",\"collaboratorIds\":[]},{\"id\":\"doc-b7257b43-0f03-474b-b30b-67bf3a2a7c60\",\"title\":\"Validation TP7 2026-10-06T09:32"
+    },
+    "/api/docs/doc-brief": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "x-editor-instance": "A",
+        "content-length": "140",
+        "Date": "Tue, 06 Oct 2026 10:31:33 GMT",
+        "Connection": "close"
+      },
+      "sample": "{\"id\":\"doc-brief\",\"title\":\"Brief produit\",\"text\":\"Le produit permet de collaborer en temps reel. Chaque edition est visible immediatement.\"}"
+    },
+    "/api/docs/doc-brief/history": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "x-editor-instance": "A",
+        "content-length": "586",
+        "Date": "Tue, 06 Oct 2026 10:31:33 GMT",
+        "Connection": "close"
+      },
+      "sample": "[{\"type\":\"insert\",\"offset\":0,\"text\":\"Le produit \",\"by\":\"alice\",\"at\":1791277427125},{\"type\":\"insert\",\"offset\":11,\"text\":\"permet de \",\"by\":\"bob\",\"at\":1791277487125},{\"type\":\"insert\",\"offset\":21,\"text\":\"collaborer \",\"by\":\"alice\",\"at\":1791277547125},{\"type\":\"insert\",\"offset\":32,\"text\":\"en temps reel. \",\"by\":\"bob\",\"at\":1791277607125},{\"type\":\"insert\",\"offset\":47,\"text\":\"Chaque edition \",\"by\":\"alice\",\"at\":1791277667125},{\"type\":\"insert\",\"offset\":62,\"text\":\"est visible \",\"by\":\"bob\",\"at\":1791277727125},"
+    },
+    "/api/docs/doc-brief/snapshot": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "x-editor-instance": "A",
+        "content-length": "160",
+        "Date": "Tue, 06 Oct 2026 10:31:33 GMT",
+        "Connection": "close"
+      },
+      "sample": "{\"id\":\"doc-brief\",\"blocs\":[{\"id\":\"doc-brief-b1\",\"text\":\"Le produit permet de collaborer en temps reel. Chaque edition est visible immediatement.\"}],\"version\":7}"
+    },
+    "/": {
+      "status": 200,
+      "headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "public, max-age=0",
+        "last-modified": "Tue, 06 Oct 2026 09:13:50 GMT",
+        "etag": "W/\"9432-1a1107d9cb0\"",
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "37938",
+        "x-editor-instance": "A",
+        "Date": "Tue, 06 Oct 2026 10:31:33 GMT",
+        "Connection": "close"
+      },
+      "sample": ""
+    }
+  }
+}

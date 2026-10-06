@@ -15,6 +15,7 @@ npm start
 Avec Docker :
 
 ```bash
+npm run setup:demo
 docker compose up --build -d --wait
 ```
 
@@ -32,6 +33,25 @@ npm run s7:load
 Les métriques sont sur `/metrics` de chaque instance, et leur santé sur `/api/health`.
 Le test de charge enregistre ses mesures dans `docs/captures/s7/`. Redis utilise un volume
 Docker persistant et n'est pas exposé sur un port de l'hôte. `docker compose stop` arrête le TP7.
+
+## Sécurité et soutenance commune
+
+Les TP1 à TP5 de sécurité sont transposés à cet éditeur. Voir [le dossier sécurité](docs/security/README.md),
+[l'audit](docs/security/rapport-audit.md) et [la matrice des grilles](docs/soutenance/grilles-et-preuves.md).
+`npm run test:security` vérifie les ACL REST/SSE, JWT, Origin WebSocket, expiration et seuils de scan.
+Les workflows couvrent SAST, secrets, dépendances, image et DAST, chacun avec un step de seuil explicite.
+Les vrais runs verts/rouges et findings Security sont référencés dans `docs/security/preuves-ci.md`.
+
+Pour le piège en direct, ouvrir les deux profils avec `&demo=1` : une commande retient les éditions
+afin de reproduire deux insertions concurrentes sur le même état, puis les libère. Une seconde commande
+ferme réellement le transport du client pendant deux secondes pour montrer la reprise par snapshot.
+Les instructions sont dans `docs/soutenance/demo.md`.
+
+REST et SSE exigent maintenant `Authorization: Bearer <JWT>` ; SSE exige aussi `?docId=<id>`.
+La liste de documents est filtrée. La création attribue le propriétaire à l'identité du jeton.
+Le mode local de profils reste pédagogique : il est interdit en production. L'image durcie exige
+une clé externe d'au moins 32 octets en production ; aucun secret de repli n'est fourni.
+L'authentification réelle, TLS et la purge documentaire restent nécessaires avant exposition publique.
 
 ## Essayer l'éditeur à deux
 

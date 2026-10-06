@@ -1,0 +1,22 @@
+
+> editeur-collaboratif@1.0.0 test:tp6
+> tsx src/realtime/s6.scenario.ts
+
+OK 1 - insertions concurrentes au meme endroit : meme texte et aucun caractere perdu
+OK 2 - reception en double : aucune duplication
+OK 3 - six ordres de reception, y compris suppression avant insertion : meme resultat
+OK 4 - les tombstones du snapshot empechent une resurrection apres reconnexion
+OK 5 - edition ulterieure entre deux insertions dont le chemin numerique coincide
+OK 6 - les offsets UTF-16 du textarea preservent les emojis
+OK 7 - suppression d’un emoji complet et restauration par snapshot
+OK 8 - deux vrais clients Socket.IO, edits concurrentes : clients et serveur convergent
+OK 9 - un retry reseau ne double ni le texte ni l’historique
+OK 10 - suppression recue avant insertion par le serveur : aucune resurrection
+OK 11 - suppression concurrente du meme caractere : une seule suppression visible
+OK 12 - lot malforme : validation atomique, aucun changement partiel
+OK 13 - autorisation par document toujours appliquee au canal CRDT
+OK 14 - l’auteur de l’historique vient du JWT et non du paquet client
+OK 15 - snapshot tardif : texte, positions et tombstones deja synchronises
+OK 16 - snapshot serveur et texte REST partagent le meme etat
+
+TP6 : 16 verifications reussies.

@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-06T11:06:42.649534+00:00",
+  "checks": {
+    "/api/health": {
+      "status": 200,
+      "hsts": "max-age=31536000; includeSubDomains",
+      "csp": "default-src 'self';base-uri 'none';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;style-src-attr 'unsafe-inline';connect-src 'self'"
+    },
+    "/api/profiles": {
+      "status": 404
+    },
+    "/metrics": {
+      "status": 404
+    },
+    "/api/auth/demo": {
+      "status": 404
+    },
+    "/": {
+      "status": 200,
+      "hsts": "max-age=31536000; includeSubDomains",
+      "csp": "default-src 'self';base-uri 'none';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;style-src-attr 'unsafe-inline';connect-src 'self'"
+    }
+  }
+}

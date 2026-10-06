@@ -1,0 +1,48 @@
+name: dast
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+concurrency:
+  group: dast-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Construire et lancer les sources du commit
+        run: |
+          npm ci
+          npm run build
+          PORT=3000 NODE_ENV=development AUTH_MODE=demo node dist/server.js > /tmp/pagespace.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health && break; sleep 1; done
+          curl -fsS http://localhost:3000/api/health
+      - name: ZAP baseline - observation et rapport JSON
+        run: |
+          mkdir -p .security-reports
+          chmod 777 .security-reports
+          set +e
+          docker run --rm --network=host -v "$PWD/.security-reports:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:2.17.0 zap-baseline.py -t http://localhost:3000 \
+              -m 1 -J zap.json -r zap.html -w zap.md -I
+          status=$?
+          test "$status" -le 2
+      - name: Seuil DAST - regles versionnees et risques MEDIUM ou plus
+        if: always()
+        run: node scripts/security/gate.mjs zap .security-reports/zap.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: zap-baseline-report
+          path: .security-reports/zap.*
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7
+      - name: Diagnostic du serveur
+        if: failure()
+        run: cat /tmp/pagespace.log

@@ -10,10 +10,8 @@ import { registerClusterSocket } from './cluster-handlers.ts'
 import type { RealtimeMetrics } from './metrics.ts'
 import type { RedisState } from './redis-state.ts'
 import type { CursorState, Member, RoomSnapshot, JoinAck, OperationAck } from './protocol.ts'
-import { RateLimiter, SECRET, verifyJwtPayload } from './security-helpers.ts'
+import { allowedOrigins, RateLimiter, SECRET, verifyJwtPayload } from './security-helpers.ts'
 
-const SERVER_PORT = Number(process.env.PORT ?? 3000)
-const ALLOWED_ORIGINS = [`http://localhost:${SERVER_PORT}`, `http://127.0.0.1:${SERVER_PORT}`]
 const MAX_MESSAGES_PER_SECOND = 20
 const GRACE_PERIOD_MS = 5_000
 
@@ -71,9 +69,24 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store,
   }
 
   const io = new Server(httpServer, {
+    serveClient: false,
     pingInterval: 25_000,
     pingTimeout: 20_000,
-    cors: { origin: process.env.PUBLIC_ORIGINS?.split(',') ?? ALLOWED_ORIGINS },
+    maxHttpBufferSize: 65_536,
+    cors: { origin: allowedOrigins() },
+    allowRequest: (req, callback) => callback(null, !req.headers.origin || allowedOrigins().includes(req.headers.origin)),
+  })
+  // Engine.IO sert son bundle et son handshake en dehors des hooks Fastify.
+  io.engine.on('headers', (headers: Record<string, string>) => {
+    headers['X-Content-Type-Options'] = 'nosniff'
+    headers['X-Frame-Options'] = 'DENY'
+    headers['Referrer-Policy'] = 'no-referrer'
+    headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
+    headers['Content-Security-Policy'] = "default-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+    headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+    headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    headers['Cache-Control'] = 'no-store'
   })
   options.metrics?.observe(io)
   if (options.shared) {
@@ -119,20 +132,25 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store,
     }
 
     socket.data.userId = payload.sub
+    socket.data.expiresAt = payload.exp * 1000
     next()
   })
 
   io.on('connection', (socket) => {
+    const expiry = setTimeout(() => socket.disconnect(true), Math.max(0, socket.data.expiresAt - Date.now()))
+    socket.once('disconnect', () => clearTimeout(expiry))
     if (options.shared) {
       registerClusterSocket(io, socket, options.shared, options.metrics)
       return
     }
     const limiter = new RateLimiter(MAX_MESSAGES_PER_SECOND)
+    const ephemeralLimiter = new RateLimiter(60)
     let legacySequence = 0
-    socket.on('disconnect', () => limiter.stop())
+    socket.on('disconnect', () => { limiter.stop(); ephemeralLimiter.stop() })
 
     socket.on('join', async (room: unknown, ack: JoinAck) => {
       if (typeof ack !== 'function') return
+      if (!ephemeralLimiter.hit()) { ack(false, 'rate limit exceeded'); socket.disconnect(true); return }
       if (typeof room !== 'string') {
         ack(false, 'room non autorisee')
         return
@@ -172,7 +190,7 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store,
       const document = store.documents.get(documentId)!
       const text = documentText(documentId)
       const clientId =
-        typeof socket.handshake.auth?.clientId === 'string'
+        typeof socket.handshake.auth?.clientId === 'string' && socket.handshake.auth.clientId.length <= 200
           ? socket.handshake.auth.clientId
           : socket.id
       const presenceId = `${socket.data.userId}:${clientId}`
@@ -290,6 +308,7 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store,
     })
 
     socket.on('cursor:move', (raw: unknown) => {
+      if (!ephemeralLimiter.hit()) { socket.disconnect(true); return }
       const room = socket.data.room as string | undefined
       const presenceId = socket.data.presenceId as string | undefined
       if (!room || !presenceId || !raw || typeof raw !== 'object') return

@@ -14,7 +14,9 @@ let passed = 0
 const check = (label: string, verify: () => void) => { verify(); console.log(`OK ${++passed} - ${label}`) }
 
 async function json<T = Record<string, unknown>>(base: string, path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(base + path, { ...options, signal: AbortSignal.timeout(5_000) })
+  const headers = new Headers(options?.headers)
+  if (path.startsWith('/api/docs')) headers.set('Authorization', `Bearer ${await token(base)}`)
+  const response = await fetch(base + path, { ...options, headers, signal: AbortSignal.timeout(5_000) })
   if (!response.ok) throw new Error(`${base}${path} : HTTP ${response.status}`)
   return response.json() as Promise<T>
 }
@@ -57,7 +59,7 @@ async function lastSse(base: string, docId: string, after = 0): Promise<{ id: nu
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), 5_000)
   try {
-    const response = await fetch(base + '/api/stream', { signal: controller.signal, headers: { 'Last-Event-ID': String(after) } })
+    const response = await fetch(base + `/api/stream?docId=${encodeURIComponent(docId)}`, { signal: controller.signal, headers: { 'Last-Event-ID': String(after), Authorization: `Bearer ${await token(base)}` } })
     const reader = response.body!.getReader()
     const decoder = new TextDecoder()
     let buffered = ''
