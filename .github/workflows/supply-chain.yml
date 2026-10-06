@@ -3,6 +3,9 @@ on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
   security-events: write
+concurrency:
+  group: supply-chain-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   deps-scan:
     runs-on: ubuntu-latest
@@ -33,6 +36,7 @@ jobs:
           name: dependency-reports
           path: .security-reports/*.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
       - name: Seuil npm - zero HIGH ou CRITICAL
         if: always()
@@ -57,6 +61,7 @@ jobs:
           name: sbom-cyclonedx
           path: sbom.cdx.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
   image-scan:
     runs-on: ubuntu-latest
@@ -88,4 +93,5 @@ jobs:
           name: trivy-image
           path: .security-reports/trivy.*
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
