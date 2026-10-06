@@ -2,6 +2,10 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 
+await mkdir(new URL('../public/vendor/', import.meta.url), { recursive: true })
+await writeFile(new URL('../public/vendor/socket.io.min.js', import.meta.url),
+  await readFile(new URL('../node_modules/socket.io-client/dist/socket.io.min.js', import.meta.url)))
+
 const output = new URL('../public/realtime/', import.meta.url)
 await mkdir(output, { recursive: true })
 for (const file of ['convergence.exemple', 'document-crdt']) {

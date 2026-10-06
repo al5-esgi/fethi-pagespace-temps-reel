@@ -1,0 +1,8 @@
+
+> editeur-collaboratif@1.0.0 scenario
+> tsx src/realtime/piege.scenario.ts
+
+replique A  : "AYXB"
+replique B  : "AYXB"
+
+CONVERGE  (CRDT)

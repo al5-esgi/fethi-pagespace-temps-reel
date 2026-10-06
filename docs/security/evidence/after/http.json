@@ -1,0 +1,59 @@
+{
+  "at": "2026-10-06T11:03:37.332Z",
+  "target": "http://localhost:3310",
+  "checks": [
+    {
+      "path": "/api/docs/doc-brief",
+      "identity": "anonyme",
+      "status": 401
+    },
+    {
+      "path": "/api/docs/doc-brief",
+      "identity": "johnny",
+      "status": 403
+    },
+    {
+      "path": "/api/docs/doc-brief",
+      "identity": "alice",
+      "status": 200
+    },
+    {
+      "path": "/api/docs/doc-brief/history",
+      "identity": "anonyme",
+      "status": 401
+    },
+    {
+      "path": "/api/docs/doc-brief/history",
+      "identity": "johnny",
+      "status": 403
+    },
+    {
+      "path": "/api/docs/doc-brief/history",
+      "identity": "alice",
+      "status": 200
+    },
+    {
+      "path": "/api/docs/doc-brief/snapshot",
+      "identity": "anonyme",
+      "status": 401
+    },
+    {
+      "path": "/api/docs/doc-brief/snapshot",
+      "identity": "johnny",
+      "status": 403
+    },
+    {
+      "path": "/api/docs/doc-brief/snapshot",
+      "identity": "alice",
+      "status": 200
+    }
+  ],
+  "headers": {
+    "content-security-policy": "default-src 'self';base-uri 'none';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';style-src-attr 'unsafe-inline';connect-src 'self'",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "referrer-policy": "no-referrer",
+    "permissions-policy": "camera=(), microphone=(), geolocation=()",
+    "cross-origin-embedder-policy": "require-corp"
+  }
+}

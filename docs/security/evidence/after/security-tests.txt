@@ -1,0 +1,34 @@
+
+> editeur-collaboratif@1.0.0 test:security
+> tsx --test tests/security.test.ts && node --test tests/gates.test.mjs
+
+✔ REST: aucune lecture anonyme, aucun document prive dans la liste (31.74775ms)
+✔ creation: proprietaire tire du JWT et corps borne (3.878042ms)
+✔ SSE: authentification, docId et filtre des evenements par document (10.879125ms)
+✔ JWT: refuse ancienne cle, absence expiration, audience incorrecte et HS512 (0.425667ms)
+✔ Socket.IO: JWT et Origin controles sur le handshake WebSocket (11.937583ms)
+✔ Socket.IO: expiration du JWT ferme une connexion deja ouverte (1229.812667ms)
+✔ HTTP: CSP sans script inline, API non cacheable et CORS restreint (1.018208ms)
+✔ production: refuse cle absente/courte et desactive la connexion demo (215.921375ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1755.166042
+✔ sast: vert, regression rouge, rapport manquant bloque (93.385875ms)
+✔ secrets: vert, regression rouge, rapport manquant bloque (86.119167ms)
+✔ npm: vert, regression rouge, rapport manquant bloque (132.693417ms)
+✔ osv: vert, regression rouge, rapport manquant bloque (153.961625ms)
+✔ image: vert, regression rouge, rapport manquant bloque (92.354833ms)
+✔ zap: vert, regression rouge, rapport manquant bloque (97.801708ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 689.985833

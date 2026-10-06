@@ -1,0 +1,14 @@
+✔ sast: vert, regression rouge, rapport manquant bloque (84.25875ms)
+✔ secrets: vert, regression rouge, rapport manquant bloque (86.500291ms)
+✔ npm: vert, regression rouge, rapport manquant bloque (82.796458ms)
+✔ osv: vert, regression rouge, rapport manquant bloque (85.077ms)
+✔ image: vert, regression rouge, rapport manquant bloque (82.050875ms)
+✔ zap: vert, regression rouge, rapport manquant bloque (82.025458ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 533.979125

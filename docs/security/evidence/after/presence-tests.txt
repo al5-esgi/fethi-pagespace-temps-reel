@@ -1,0 +1,22 @@
+
+> editeur-collaboratif@1.0.0 test:tp5
+> tsx src/realtime/s5.scenario.ts
+
+OK 1 - un JWT invalide est refuse
+OK 2 - premier snapshot : texte, version et presence personnelle
+OK 3 - presence-joined diffuse le profil du nouveau collaborateur
+OK 4 - curseur et selection ephemeres : aucun ajout dans l’historique
+OK 5 - arrivee tardive : la selection d’Alice est deja dans le snapshot
+OK 6 - une insertion decale les curseurs et selections conserves dans le snapshot
+OK 7 - une suppression recale correctement le curseur
+OK 8 - les droits par document sont respectes
+OK 9 - un changement de document refuse ne laisse pas de presence fantome
+OK 10 - les curseurs sont bornes a la longueur du document
+OK 11 - un curseur malforme ne remplace pas la derniere valeur valide
+OK 12 - presence et curseurs restent isoles dans leur room
+OK 13 - reconnexion courte : meme identite, selection restauree, aucun faux depart
+OK 14 - depart apres 5 secondes : presence-left unique et membre retire du snapshot
+OK 15 - retour apres expiration : nouvelle annonce de presence
+OK 16 - un changement de room retire immediatement la presence de l’ancien document
+
+TP5 : 16 verifications reussies.

@@ -1,0 +1,21 @@
+
+> test:tp7
+> tsx src/realtime/s7.scenario.ts
+
+OK 1 - deux instances distinctes et Redis connecte
+OK 2 - document cree sur A visible sur B
+OK 3 - snapshots A et B : memes positions stables, texte et membres globaux
+OK 4 - curseur et selection A vers B par Redis
+OK 5 - insertions concurrentes sur A/B : fan-out bidirectionnel et convergence
+OK 6 - etat REST canonique identique sur les deux instances
+OK 7 - renvoi sur une autre instance : pas de doublon dans l’historique
+OK 8 - SSE et Last-Event-ID communs a A/B
+OK 9 - arrivee tardive sur B : editions de A deja dans le snapshot
+OK 10 - proxy sticky : polling HTTP stable, aucun Session ID unknown
+OK 11 - metriques par instance : connexions actives et Redis
+OK 12 - reconnexion A vers B avant 5 s : meme identite, aucune fausse sortie
+OK 13 - expiration globale : presence-left unique apres 5 secondes
+OK 14 - les autorisations restent appliquees en multi-instance
+OK 15 - positions non canoniques refusees sans divergence du document
+
+TP7 : 15 verifications reussies. Document de test : doc-d3003f9e-fa40-4214-a012-82ad3c8e8fcb

@@ -1,9 +1,19 @@
 name: editeur-tp7
 
+x-logging: &logging
+  driver: local
+  options:
+    max-size: "2m"
+    max-file: "2"
+
 x-app: &app
   build: .
+  logging: *logging
   environment: &environment
     PORT: "3000"
+    NODE_ENV: development
+    AUTH_MODE: demo
+    JWT_SECRET: ${JWT_SECRET:?Lancer npm run setup:demo avant docker compose up}
     REDIS_URL: redis://redis:6379
     REDIS_NAMESPACE: editeur-tp7
     PUBLIC_ORIGINS: http://localhost:3010,http://127.0.0.1:3010,http://localhost:3101,http://127.0.0.1:3101,http://localhost:3102,http://127.0.0.1:3102
@@ -11,14 +21,24 @@ x-app: &app
     redis:
       condition: service_healthy
   healthcheck:
-    test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+    test: ["CMD", "/nodejs/bin/node", "-e", "fetch('http://localhost:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
     interval: 3s
     timeout: 3s
     retries: 15
+  read_only: true
+  tmpfs:
+    - /tmp:noexec,nosuid,size=16m
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  mem_limit: 512m
+  cpus: 1.0
 
 services:
   redis:
     image: redis:7-alpine
+    logging: *logging
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis-data:/data
@@ -46,6 +66,7 @@ services:
 
   proxy:
     image: nginx:alpine
+    logging: *logging
     ports:
       - "127.0.0.1:3010:3000"
     volumes:

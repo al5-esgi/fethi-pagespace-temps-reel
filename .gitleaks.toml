@@ -1,0 +1,9 @@
+title = "Pagespace : regles standard et cle JWT de l'application"
+[extend]
+useDefault = true
+[[rules]]
+id = "pagespace-jwt-literal"
+description = "Cle JWT litterale dans le code applicatif"
+regex = '''(?i)(?:jwt_secret|export\s+const\s+secret)\s*=\s*['"]([^'"\r\n]+)['"]'''
+secretGroup = 1
+path = '''(^|/)src/.*\.(ts|js)$'''

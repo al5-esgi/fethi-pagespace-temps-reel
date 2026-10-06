@@ -1,0 +1,34 @@
+rules:
+  - id: pagespace-hardcoded-jwt-secret
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: La cle JWT doit venir du secret de deploiement, jamais d'un literal.
+    pattern-either:
+      - pattern: const SECRET = "..."
+      - pattern: const JWT_SECRET = "..."
+      - pattern: jwt.sign($PAYLOAD, "...", ...)
+    metadata:
+      cwe: ["CWE-798: Use of Hard-coded Credentials"]
+      confidence: HIGH
+      security-severity: "9.1"
+  - id: pagespace-weak-crypto
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: MD5 et SHA-1 ne conviennent pas aux decisions de securite.
+    pattern-either:
+      - pattern: $CRYPTO.createHash("md5")
+      - pattern: $CRYPTO.createHash("sha1")
+    metadata:
+      cwe: ["CWE-327: Use of a Broken or Risky Cryptographic Algorithm"]
+      confidence: HIGH
+      security-severity: "7.5"
+  - id: pagespace-unscoped-rest-document
+    languages: [typescript]
+    severity: ERROR
+    message: Les routes REST doivent charger un document avec readAccessibleDocument.
+    paths:
+      include: ['/src/rest.ts']
+    pattern: store.documents.get(...)
+    metadata:
+      cwe: ["CWE-862: Missing Authorization"]
+      security-severity: "8.1"

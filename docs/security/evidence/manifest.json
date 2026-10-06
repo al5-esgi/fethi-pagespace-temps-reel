@@ -1,0 +1,151 @@
+{
+  "at": "2026-10-06T11:07:44.020445+00:00",
+  "beforeCommit": "cdc7fec",
+  "githubRunsVerified": false,
+  "measurements": {
+    "before": {
+      "npm": {
+        "info": 0,
+        "low": 0,
+        "moderate": 2,
+        "high": 2,
+        "critical": 0,
+        "total": 4
+      },
+      "osvAffectedEntries": 5,
+      "osvVulnerabilityEntries": 11,
+      "trivy": {
+        "HIGH": 14,
+        "MEDIUM": 17,
+        "LOW": 1
+      },
+      "zapAlerts": [
+        {
+          "pluginid": "10038",
+          "name": "Content Security Policy (CSP) Header Not Set",
+          "risk": "2"
+        },
+        {
+          "pluginid": "10020",
+          "name": "Missing Anti-clickjacking Header",
+          "risk": "2"
+        },
+        {
+          "pluginid": "90004",
+          "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+          "risk": "1"
+        },
+        {
+          "pluginid": "90004",
+          "name": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+          "risk": "1"
+        },
+        {
+          "pluginid": "90004",
+          "name": "Cross-Origin-Resource-Policy Header Missing or Invalid",
+          "risk": "1"
+        },
+        {
+          "pluginid": "10063",
+          "name": "Permissions Policy Header Not Set",
+          "risk": "1"
+        },
+        {
+          "pluginid": "10021",
+          "name": "X-Content-Type-Options Header Missing",
+          "risk": "1"
+        },
+        {
+          "pluginid": "10027",
+          "name": "Information Disclosure - Suspicious Comments",
+          "risk": "0"
+        },
+        {
+          "pluginid": "10109",
+          "name": "Modern Web Application",
+          "risk": "0"
+        },
+        {
+          "pluginid": "10049",
+          "name": "Storable and Cacheable Content",
+          "risk": "0"
+        },
+        {
+          "pluginid": "10049",
+          "name": "Storable but Non-Cacheable Content",
+          "risk": "0"
+        }
+      ]
+    },
+    "after": {
+      "npm": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "osvAffectedEntries": 0,
+      "osvVulnerabilityEntries": 0,
+      "trivy": {
+        "MEDIUM": 23,
+        "LOW": 8
+      },
+      "zapAlerts": [
+        {
+          "pluginid": "10109",
+          "name": "Modern Web Application",
+          "risk": "0"
+        },
+        {
+          "pluginid": "10049",
+          "name": "Storable and Cacheable Content",
+          "risk": "0"
+        },
+        {
+          "pluginid": "10049",
+          "name": "Storable but Non-Cacheable Content",
+          "risk": "0"
+        }
+      ]
+    }
+  },
+  "files": {
+    "before/npm-audit.json": "6a5cc08fb8cda0be024a10e5de3adb3f6ec754a48ebf76087f194ab447e07904",
+    "before/osv.json": "a025dde35ef25386e706f97f79aceca1b08cf959d6b00fd2ff2ca4082ecec7ee",
+    "before/trivy.json": "50b60877eb72be0a7798bbdbc62864e4ebff20e8734cb30f1cbcc0f98714945f",
+    "before/semgrep.sarif": "4812cdf2ace684cea52e2fe1d5be9e462c57a72d01a2a04eedc2e18be584de64",
+    "before/zap.json": "d5526fa16ed759fd1c9a31e83fac1501bd73a7ecfca6bc7bea2a319385e0cdbe",
+    "before/zap.yaml": "2d65bbdf078384c90929667af706c7f2a5b19dab1872313d3f589dcf7da02797",
+    "before/http.json": "65040ad35255a4c3514a5107b76724c269c61a356418d8d67ac532c5ecd54299",
+    "before/package-lock.json": "51c4b36c36ff377d4b4695cb282d7b251bd53f2d9b0b921e381b7ca65b20cd1a",
+    "before/gitleaks.json": "23511720834a09da358762b739677283780028f8b660d07722376b54ca533b4f",
+    "before/zap.html": "adf72c6122017091451210514f16434e12cef72a54620f389a287f6039d64504",
+    "before/zap.md": "ce1c68aa409ef50feb6b6381a66698b34792847d4b697a54700319ee88e5e6cd",
+    "after/npm-audit.json": "c101315a6849fa2de80573bcb3e4473ba75edfda7024c5b0bbff2acb89702906",
+    "after/sbom.cdx.json": "2ee6b36aefeb2d5e3440669deea7475e7b8598e9aae5f34bbbf9ad126140828d",
+    "after/osv.json": "54345d5194d238b6017d0f3181f392109ce35023cc6b4bdfa8c134943dcb578e",
+    "after/trivy.json": "51f9da71398e45d987b22dd3095ee7351eae696f0fc5be3dbed31f55f62ad42b",
+    "after/cluster-tests.txt": "54a32c3874d9d68cdd526cdb6cc7dda72a04c83e3b58685d0054ad11b0323b5c",
+    "after/semgrep.sarif": "7e3d0be88f52ee057472322da248c6debbc378b7306618b15fb136517f10f2b9",
+    "after/presence-tests.txt": "1e3f86e33aa83ecedb738d0c2d35ff823b03d18d09d66bbcc4e7b4aed5124266",
+    "after/production.json": "80e92ffdb33824a7a00d5689e96ac1801d248e0e9b0ce61f57af0f6f4d2e0eef",
+    "after/zap.json": "a592a96fa0c988d579905bab33b94a3ecfdd1a7367f0f713cbb2a8a1c083a80b",
+    "after/concurrency-test.txt": "ad2ace07695491cdd117563171f76fbb46ebc8e63b2aa1cec01854173bf49d99",
+    "after/zap.yaml": "b3a4522a1698e73df7f1d4630d6edba8b3b6ca1a326c16faebfc951395d3a038",
+    "after/http.json": "13433c528ec1277714233458f9cf11504e525d778f6bcd866090e879b8833db1",
+    "after/gate-tests.txt": "4fba64ab90f3d24c97e1c08b1ae51f8b3e4390fd8487e43590ec3275a5864470",
+    "after/convergence-alice.jpg": "2fb97b6d858afb25c6ff5ffa169e72c51b72df5ad027079ed753bab0502f3831",
+    "after/gitleaks.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "after/convergence-johnny.jpg": "fec3e15507c5a542517f6cb61caa919a6445281408a2bf0c6fd414567f5edab6",
+    "after/zap.html": "e88049f59618dea96991c832bfa6cbfb311f1b156d140776f2365ce521f27f34",
+    "after/convergence-tests.txt": "4906acfa73cd6608614485b2fdc352329577c0c940e82007554b9038adf4b460",
+    "after/security-tests.txt": "65e6957bfd4d8b6cef9c8812104ec98b7eb6c30bb3be42f9e0f70959846168dc",
+    "after/browser-proof.json": "feacaa48947cf17841786fc9f9cb51249a21fede3e7b5080c33a4659904918a8",
+    "after/zap.md": "b748c9d84adeb546a9a1d1b85a7d5475f0d3de8e97da2943a0cf7c55bcf160f7",
+    "regression/result.json": "c7f4511de5395e523bf78b8c542ce41977ba5a278f1e32933eb763c56e8158e1",
+    "regression/semgrep.sarif": "4f5c38df38ed0fd8cc7d4256d8273655bf693fecf438ce3abe677d68c9c1297f",
+    "regression/gitleaks.json": "b18807d1a5e156f131ec293aed851c1ff8f6069b36ae6f72f48aaf5be2d1278e"
+  }
+}

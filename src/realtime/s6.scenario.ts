@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
-import jwt from 'jsonwebtoken'
 import { io as createClient, type Socket } from 'socket.io-client'
 import { createDocument } from '../domain.ts'
 import { createStore } from '../store.ts'
 import type { CharOp } from './convergence.exemple.ts'
 import { DocumentCrdt } from './document-crdt.ts'
-import { SECRET } from './security-helpers.ts'
+import { signAccessToken } from './security-helpers.ts'
 import { startSocketIoServer } from './socketio-server.ts'
 
 let passed = 0
@@ -117,7 +116,7 @@ try {
   async function connect(userId: string, site: string): Promise<{ socket: Socket; text: DocumentCrdt }> {
     const socket = createClient(`http://127.0.0.1:${(address as { port: number }).port}`, {
       autoConnect: false, reconnection: false, transports: ['websocket'],
-      auth: { token: jwt.sign({ sub: userId }, SECRET), clientId: site },
+      auth: { token: signAccessToken(userId), clientId: site },
     })
     clients.push(socket)
     const connected = new Promise<void>((resolve, reject) => { socket.once('connect', resolve); socket.once('connect_error', reject) })

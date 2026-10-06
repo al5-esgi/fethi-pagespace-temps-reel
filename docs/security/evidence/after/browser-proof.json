@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-06T10:59:38.621Z",
+  "target": "http://localhost:3310",
+  "alice": "AXYB",
+  "johnny": "AXYB",
+  "consoleErrors": [],
+  "method": "Deux snapshots AB, envois retenus, insertions X/Y puis liberation des lots CRDT"
+}

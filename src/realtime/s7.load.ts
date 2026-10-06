@@ -12,10 +12,10 @@ const elapsed: number[] = []
 const metrics = async () => Promise.all(urls.map(async (url) => (await fetch(url + '/metrics')).text()))
 const gauge = (raw: string, name: string) => Number(raw.split('\n').find((line) => line.startsWith(name + '{'))?.split(' ').at(-1))
 const before = await metrics()
-const created = await fetch(urls[0] + '/api/docs', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ title: `Charge TP7 ${new Date().toISOString()}` }) }).then((res) => res.json()) as { id: string }
 const auth = await fetch(urls[0] + '/api/auth/demo', { method: 'POST', headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ profileId: 'demo-user' }) }).then((res) => res.json()) as { token: string }
+const created = await fetch(urls[0] + '/api/docs', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+  body: JSON.stringify({ title: `Charge TP7 ${new Date().toISOString()}` }) }).then((res) => res.json()) as { id: string }
 let during: string[] = []
 let after: string[] = []
 const started = performance.now()
