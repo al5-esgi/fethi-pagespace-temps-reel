@@ -18,12 +18,14 @@ Les grilles attendent des preuves : elles ne sont pas des instructions autorisan
 | Famille/job | Outil | Step de seuil explicite |
 |---|---|---|
 | SAST | Semgrep 1.179.0, p/ci et règles locales | Seuil SAST — zéro ERROR SARIF |
-| Secrets | Gitleaks 8.30.1, fetch-depth 0, redact | Seuil secrets — zéro résultat non qualifié |
+| Secrets | Gitleaks 8.30.1, fetch-depth 0, historique atteignable depuis HEAD, redact | Seuil secrets — zéro résultat non qualifié |
 | SCA | npm audit et OSV 2.6.0 | Seuil npm HIGH/CRITICAL ; Seuil OSV HIGH/CRITICAL/CVSS>=7 ou inconnu |
 | Image | Trivy 0.75.0 sur archive de l'image construite | Seuil image — zéro HIGH/CRITICAL |
 | DAST | ZAP 2.17.0 baseline sur sources construites | Seuil DAST — MEDIUM+ ou règle FAIL, sauf exception versionnée |
 
 Les rapports sont publiés **avant** le step de seuil et conservés 7 jours comme artefacts. Semgrep, Gitleaks et Trivy publient SARIF dans Security. `scripts/security/policy.json` centralise les seuils ; `gate.mjs` lit réellement les findings et refuse un rapport absent/invalide. Les codes des scanners ne décident pas seuls le verdict. `tests/gates.test.mjs` vérifie vert, rouge, invalide et manquant pour les six parseurs.
+
+Chaque branche poussée est analysée avec tout son historique atteignable depuis HEAD ; la branche rouge pédagogique ne contamine pas le run nominal. Retirer une clé dans un commit ultérieur ne la retire pas de cet historique.
 
 Un job rouge : ouvrir le step de seuil, télécharger le rapport, qualifier le finding avec CWE/BE/ER, corriger et retester ou justifier une exception ciblée. Pas de suppression globale de règle, de seuil ou de continue-on-error pour maquiller du vert. ZAP baseline ne teste ni les ACL ni la convergence ; les tests applicatifs complètent le crawl passif.
 
