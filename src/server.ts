@@ -11,6 +11,7 @@ import { registerHttpSecurity } from './security.ts'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT ?? 3000)
+const LISTEN_HOST = process.env.LISTEN_HOST ?? (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1')
 const INSTANCE = process.env.INSTANCE ?? 'solo'
 
 const store = createStore()
@@ -44,6 +45,6 @@ app.addHook('preClose', () => new Promise<void>((resolve) => io.close(() => reso
 app.addHook('onClose', async () => { await shared?.close() })
 for (const signal of ['SIGINT', 'SIGTERM'] as const) process.once(signal, () => { void app.close() })
 
-await app.listen({ port: PORT, host: '0.0.0.0' })
+await app.listen({ port: PORT, host: LISTEN_HOST })
 console.log(`[${INSTANCE}] editeur-collaboratif : http://localhost:${PORT}`)
 console.log(`[${INSTANCE}] Socket.IO : ${shared ? 'Redis adapter + etat partage' : 'instance unique'}, /metrics disponible`)

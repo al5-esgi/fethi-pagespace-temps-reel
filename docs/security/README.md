@@ -45,7 +45,7 @@ docker compose up --build -d --wait
 npm run test:tp7
 ```
 
-Connexion locale : localhost:3010, ou A/B localhost:3101 et :3102. Les sorties actuelles sont dans `evidence/after/`. `Dockerfile.ci` conserve le Dockerfile initial non durci comme contre-exemple ; seul Dockerfile/Dockerfile.hardened est utilisé pour les livraisons.
+Connexion locale : localhost:3010, ou A/B localhost:3101 et :3102. Une instance npm de démonstration écoute par défaut uniquement sur 127.0.0.1. Compose déclare explicitement LISTEN_HOST=0.0.0.0 à l’intérieur du réseau Docker et publie seulement les ports de boucle locale. Les sorties actuelles sont dans `evidence/after/`. `Dockerfile.ci` conserve le Dockerfile initial non durci comme contre-exemple ; seul Dockerfile/Dockerfile.hardened est utilisé pour les livraisons.
 
 Mesures HTTP sans afficher les jetons :
 

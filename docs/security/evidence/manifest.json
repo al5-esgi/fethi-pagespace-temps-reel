@@ -137,6 +137,7 @@
     "after/trivy.json": "51f9da71398e45d987b22dd3095ee7351eae696f0fc5be3dbed31f55f62ad42b",
     "after/cluster-tests.txt": "54a32c3874d9d68cdd526cdb6cc7dda72a04c83e3b58685d0054ad11b0323b5c",
     "after/semgrep.sarif": "7e3d0be88f52ee057472322da248c6debbc378b7306618b15fb136517f10f2b9",
+    "after/listener.json": "8ffaef9c03ea07832d4fc47972b629df6e61d3d28bc63d5318d82d3673c33792",
     "after/presence-tests.txt": "1e3f86e33aa83ecedb738d0c2d35ff823b03d18d09d66bbcc4e7b4aed5124266",
     "after/production.json": "80e92ffdb33824a7a00d5689e96ac1801d248e0e9b0ce61f57af0f6f4d2e0eef",
     "after/zap.json": "a592a96fa0c988d579905bab33b94a3ecfdd1a7367f0f713cbb2a8a1c083a80b",

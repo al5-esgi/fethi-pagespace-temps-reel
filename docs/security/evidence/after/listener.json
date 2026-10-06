@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-06T11:47:23.962288+00:00",
+  "demoDefaultListener": [
+    "127.0.0.1:3310"
+  ],
+  "dockerListener": "explicitement 0.0.0.0 dans le reseau Docker, ports publies en 127.0.0.1"
+}

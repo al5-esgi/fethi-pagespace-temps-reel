@@ -11,6 +11,7 @@ x-app: &app
   logging: *logging
   environment: &environment
     PORT: "3000"
+    LISTEN_HOST: "0.0.0.0"
     NODE_ENV: development
     AUTH_MODE: demo
     JWT_SECRET: ${JWT_SECRET:?Lancer npm run setup:demo avant docker compose up}
