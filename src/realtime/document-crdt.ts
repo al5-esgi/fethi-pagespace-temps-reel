@@ -149,10 +149,11 @@ export function parseCharOps(raw: unknown): CharOp[] | null {
     if (!value || typeof value !== 'object') return null
     const op = value as CharOp
     if (op.type !== 'insert' && op.type !== 'delete') return null
-    if (!op.pos || typeof op.pos.site !== 'string' || !op.pos.site || op.pos.site.length > 1_024 ||
+    if (!op.pos || typeof op.pos.site !== 'string' || !op.pos.site || op.pos.site.length > 1_024 || /\p{Surrogate}/u.test(op.pos.site) ||
         !Array.isArray(op.pos.path) || op.pos.path.length === 0 || op.pos.path.length > 128 ||
-        !op.pos.path.every((digit) => Number.isSafeInteger(digit) && digit >= 0 && digit <= 1_000)) return null
-    if (op.type === 'insert' && (typeof op.value !== 'string' || [...op.value].length !== 1)) return null
+        !op.pos.path.every((digit) => Number.isSafeInteger(digit) && digit >= 0 && digit <= 1_000) ||
+        op.pos.path.at(-1) === 0) return null
+    if (op.type === 'insert' && (typeof op.value !== 'string' || [...op.value].length !== 1 || /\p{Surrogate}/u.test(op.value))) return null
     result.push({ type: op.type, pos: { path: [...op.pos.path], site: op.pos.site },
       ...(op.type === 'insert' ? { value: op.value } : {}) })
   }

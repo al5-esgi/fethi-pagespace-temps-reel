@@ -571,6 +571,9 @@
     let last = ''
     let cursorFrame = 0
     let operationQueue = Promise.resolve()
+    let joiningDocumentId = ''
+    let pendingRemoteOps = []
+    let pendingPresence = []
 
     editor.disabled = true
 
@@ -804,6 +807,9 @@
       const generation = sessionGeneration
       const requestedDocumentId = docSelect.value
       activeRoom = ''
+      joiningDocumentId = requestedDocumentId
+      pendingRemoteOps = []
+      pendingPresence = []
       setAccess(false)
       setStatus('Acces au document…')
       syncState.textContent = 'Synchronisation…'
@@ -811,12 +817,14 @@
       socket.timeout(5000).emit('join', `doc:${docSelect.value}`, (timeoutError, ok, reason, snapshot) => {
         if (generation !== sessionGeneration || requestedDocumentId !== docSelect.value) return
         if (timeoutError) {
+          joiningDocumentId = ''
           setStatus('Le serveur ne repond pas', 'error')
           syncState.textContent = 'Echec de synchronisation'
           addActivity('Le join a expire')
           return
         }
         if (!ok || !snapshot) {
+          joiningDocumentId = ''
           activeRoom = ''
           editor.value = ''
           last = ''
@@ -833,6 +841,18 @@
 
         activeRoom = `doc:${docSelect.value}`
         applySnapshot(snapshot)
+        for (const ops of pendingRemoteOps) for (const op of ops) crdt.apply(op)
+        pendingRemoteOps = []
+        editor.value = crdt.toString()
+        last = editor.value
+        for (const [event, payload] of pendingPresence) presenceHandlers[event](payload)
+        pendingPresence = []
+        joiningDocumentId = ''
+        const self = members.has(selfId) ? resolveMember(members.get(selfId)) : null
+        if (self) editor.setSelectionRange(self.selectionStart, self.selectionEnd,
+          self.position === self.selectionStart && self.selectionStart !== self.selectionEnd ? 'backward' : 'forward')
+        renderMembers()
+        updateStats()
         setAccess(true)
         setStatus(`Connecte a ${activeRoom}`, 'connected')
         addActivity(`Room ${activeRoom} rejointe`)
@@ -893,42 +913,43 @@
       addActivity(`Reconnecte apres ${attempt} tentative${attempt > 1 ? 's' : ''}`)
     })
 
-    socket.on('presence-joined', (member) => {
-      if (!activeRoom || member.docId !== docSelect.value) return
-      members.set(member.presenceId, member)
-      renderMembers()
-      addActivity(`${member.label} a rejoint le document`)
-    })
-
-    socket.on('presence-restored', (member) => {
-      if (!activeRoom || member.docId !== docSelect.value) return
-      members.set(member.presenceId, member)
-      renderMembers()
-      addActivity(`${member.label} reconnecte sans depart`)
-    })
-
-    socket.on('presence-left', ({ docId, presenceId }) => {
-      if (!activeRoom || docId !== docSelect.value) return
-      const member = members.get(presenceId)
-      members.delete(presenceId)
-      renderMembers()
-      addActivity(`${member?.label ?? 'Un collaborateur'} est parti`)
-    })
-
-    socket.on('cursor:move', (member) => {
-      if (!activeRoom || member.docId !== docSelect.value) return
-      members.set(member.presenceId, member)
-      renderMembers()
-    })
-
-    socket.on('cursors:update', ({ docId, members: updatedMembers }) => {
-      if (!activeRoom || docId !== docSelect.value) return
-      for (const member of updatedMembers) members.set(member.presenceId, member)
+    const presenceHandlers = {
+      'presence-joined': (member) => {
+        members.set(member.presenceId, member)
+        addActivity(`${member.label} a rejoint le document`)
+      },
+      'presence-restored': (member) => {
+        members.set(member.presenceId, member)
+        addActivity(`${member.label} reconnecte sans depart`)
+      },
+      'presence-left': ({ presenceId }) => {
+        const member = members.get(presenceId)
+        members.delete(presenceId)
+        addActivity(`${member?.label ?? 'Un collaborateur'} est parti`)
+      },
+      'cursor:move': (member) => members.set(member.presenceId, member),
+      'cursors:update': ({ members: updatedMembers }) => {
+        for (const member of updatedMembers) members.set(member.presenceId, member)
+      },
+    }
+    for (const [event, handler] of Object.entries(presenceHandlers)) socket.on(event, (payload) => {
+      if (payload.docId !== docSelect.value) return
+      if (!activeRoom && joiningDocumentId === payload.docId) {
+        pendingPresence.push([event, payload])
+        return
+      }
+      if (!activeRoom) return
+      handler(payload)
       renderMembers()
     })
 
     socket.on('crdt:op', ({ docId, ops }) => {
-      if (!activeRoom || docId !== docSelect.value) return
+      if (docId !== docSelect.value) return
+      if (!activeRoom && joiningDocumentId === docId) {
+        pendingRemoteOps.push(ops)
+        return
+      }
+      if (!activeRoom) return
       applyingRemote = true
       const selectionStart = crdt.anchorAt(editor.selectionStart)
       const selectionEnd = crdt.anchorAt(editor.selectionEnd)
@@ -948,6 +969,7 @@
       if (editor.disabled || !socket.connected || !activeRoom || cursorFrame) return
       cursorFrame = requestAnimationFrame(() => {
         cursorFrame = 0
+        if (editor.disabled || !socket.connected || !activeRoom) return
         const cursor = {
           position: editor.selectionDirection === 'backward' ? editor.selectionStart : editor.selectionEnd,
           selectionStart: editor.selectionStart,

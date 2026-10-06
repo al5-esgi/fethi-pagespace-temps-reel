@@ -1,0 +1,38 @@
+# HELP ws_active_connections Connexions Socket.IO actuellement ouvertes
+# TYPE ws_active_connections gauge
+ws_active_connections{instance="A"} 50
+
+# HELP ws_connects_total Connexions Socket.IO etablies
+# TYPE ws_connects_total counter
+ws_connects_total{instance="A"} 51
+
+# HELP ws_disconnects_total Connexions Socket.IO fermees
+# TYPE ws_disconnects_total counter
+ws_disconnects_total{instance="A"} 1
+
+# HELP ws_document_rooms Rooms document avec une connexion locale
+# TYPE ws_document_rooms gauge
+ws_document_rooms{instance="A"} 1
+
+# HELP redis_connected Redis disponible (1) ou absent (0)
+# TYPE redis_connected gauge
+redis_connected{instance="A"} 1
+
+# HELP ws_crdt_batches_total Lots CRDT acceptes
+# TYPE ws_crdt_batches_total counter
+ws_crdt_batches_total{instance="A"} 3
+
+# HELP ws_handshake_seconds Duree serveur entre handshake et connexion
+# TYPE ws_handshake_seconds histogram
+ws_handshake_seconds_bucket{le="0.005",instance="A"} 51
+ws_handshake_seconds_bucket{le="0.01",instance="A"} 51
+ws_handshake_seconds_bucket{le="0.025",instance="A"} 51
+ws_handshake_seconds_bucket{le="0.05",instance="A"} 51
+ws_handshake_seconds_bucket{le="0.1",instance="A"} 51
+ws_handshake_seconds_bucket{le="0.25",instance="A"} 51
+ws_handshake_seconds_bucket{le="0.5",instance="A"} 51
+ws_handshake_seconds_bucket{le="1",instance="A"} 51
+ws_handshake_seconds_bucket{le="2",instance="A"} 51
+ws_handshake_seconds_bucket{le="+Inf",instance="A"} 51
+ws_handshake_seconds_sum{instance="A"} 0.020000000000000007
+ws_handshake_seconds_count{instance="A"} 51

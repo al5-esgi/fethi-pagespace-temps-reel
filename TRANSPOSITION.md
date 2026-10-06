@@ -33,7 +33,7 @@ Les deux onglets modifient le même texte, même lorsqu’ils sélectionnent des
 
 ## Avancement
 
-Les tranches 1 a 6 du stub sont maintenant remplacees : flux SSE rattrapable, serveur WebSocket
+Les tranches 1 a 7 du stub sont maintenant remplacees : flux SSE rattrapable, serveur WebSocket
 securise, rooms Socket.IO par document, presence avec delai de grace, curseurs et selections
 ephemeres affiches directement dans la feuille, profils de demonstration avec droits distincts,
 et snapshot complet lors du `join`.
@@ -47,3 +47,10 @@ affichent le meme texte apres des insertions concurrentes (captures dans `docs/c
 TP5 vérifié : `npm run typecheck` et `npm run test:tp5` passent (16 vérifications).
 Les captures de snapshot, de reconnexion courte et de départ sont rangées dans
 `docs/captures/s5/`, avec les manipulations et résultats dans son `README.md`.
+
+TP7 : deux instances A/B derriere nginx sticky sur 3010, `@socket.io/redis-adapter`,
+etat CRDT et presence partages dans Redis, snapshots coherents entre instances, SSE avec
+identifiants globaux, metriques Prometheus sur `/metrics`. L'ADR-3 est proposee, en attente
+des essais TP8. `npm run test:tp7` passe 15 verifications ; `npm run s7:load` valide
+100 connexions (50 sur chaque instance), puis le retour des jauges a zero.
+Les captures et les relevés bruts sont dans `docs/captures/s7/`.

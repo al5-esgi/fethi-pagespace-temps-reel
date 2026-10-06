@@ -14,12 +14,17 @@
     "s3:token": "tsx src/realtime/make-token.ts",
     "test:tp5": "tsx src/realtime/s5.scenario.ts",
     "test:tp6": "tsx src/realtime/s6.scenario.ts",
+    "test:tp7": "tsx src/realtime/s7.scenario.ts",
+    "s7:load": "tsx src/realtime/s7.load.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@fastify/static": "^8.0.3",
+    "@socket.io/redis-adapter": "^8.3.0",
     "fastify": "^5.2.0",
     "jsonwebtoken": "^9.0.2",
+    "prom-client": "^15.1.3",
+    "redis": "^4.7.0",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "ws": "^8.18.0"

@@ -15,8 +15,23 @@ npm start
 Avec Docker :
 
 ```bash
-docker compose up --build
+docker compose up --build -d --wait
 ```
+
+Le TP7 lance deux éditeurs A/B, Redis et nginx. Ouvrir `http://localhost:3010` pour passer
+par le proxy, ou `http://localhost:3101/?profile=alice` et `http://localhost:3102/?profile=bob`
+pour constater directement la collaboration entre deux instances.
+Le mode `npm run dev` reste une instance unique sur 3000, sans Redis.
+
+```bash
+npm run test:tp7
+npm run s7:load
+# N=500 npm run s7:load  # charge modeste optionnelle
+```
+
+Les métriques sont sur `/metrics` de chaque instance, et leur santé sur `/api/health`.
+Le test de charge enregistre ses mesures dans `docs/captures/s7/`. Redis utilise un volume
+Docker persistant et n'est pas exposé sur un port de l'hôte. `docker compose stop` arrête le TP7.
 
 ## Essayer l'éditeur à deux
 
@@ -55,7 +70,7 @@ Donnees de demonstration : `npm run seed` (2 documents, dont un avec un historiq
 
 ## Etat de la couche temps reel
 
-Les étapes 1 à 6 sont implémentées : SSE rattrapable, serveur WebSocket sécurisé,
+Les étapes 1 à 7 sont implémentées : SSE rattrapable, serveur WebSocket sécurisé,
 rooms Socket.IO, présence avec délai de grâce, curseurs et sélections éphémères,
 et snapshot à la connexion. Le CRDT de séquence fourni est branché dans le serveur et le
 navigateur : les modifications concurrentes convergent et les renvois sont idempotents.
@@ -63,7 +78,9 @@ Les suppressions et les positions stables sont incluses dans le snapshot.
 Le stub initial est conservé comme référence. Voir `TRANSPOSITION.md` pour la progression.
 `npm run scenario` vérifie la convergence ; `npm run scenario -- --naif` montre l'ancien défaut.
 L'ADR-2 et les preuves de validation sont dans `docs/adr/0002-strategie-de-convergence.md`
-et `docs/captures/s6/`. La diffusion multi-instance est l'étape suivante (TP7).
+et `docs/captures/s6/`. Le TP7 ajoute l'adaptateur Redis, un état CRDT et une présence partagés,
+deux instances derrière nginx, des identifiants SSE communs et les métriques Prometheus.
+Les résultats sont dans `docs/captures/s7/` et l'ADR-3 reste proposée jusqu'aux essais du TP8.
 
 ## Structure
 
@@ -79,6 +96,11 @@ src/realtime/socketio-server.ts    rooms, presence, snapshots et curseurs
 src/realtime/s5.scenario.ts        verification automatisee du TP5
 src/realtime/document-crdt.ts      adaptateur partage du CRDT fourni
 src/realtime/s6.scenario.ts        verification de la convergence et des paquets CRDT
+src/realtime/redis-state.ts         etat partage, presence et SSE atomiques
+src/realtime/cluster-handlers.ts    edition et presence en multi-instance
+src/realtime/metrics.ts             metriques Prometheus par instance
+src/realtime/s7.scenario.ts         verification A/B via Redis et proxy
+src/realtime/s7.load.ts             mesure de charge locale et export des relevés
 src/realtime/convergence.exemple.ts  strategie de convergence adaptee (fourni, a brancher)
 src/realtime/piege.scenario.ts  le cas de concurrence a faire converger
 public/index.html          front de demonstration (2 onglets = 2 co-editeurs)

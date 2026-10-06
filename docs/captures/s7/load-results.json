@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-06T09:21:10.587Z",
+  "connections": 100,
+  "successful": 100,
+  "totalMs": 137.52,
+  "handshakeP50Ms": 62.8,
+  "handshakeP95Ms": 102.89,
+  "instances": [
+    {
+      "instance": "A",
+      "url": "http://127.0.0.1:3101",
+      "before": 0,
+      "during": 50,
+      "after": 0,
+      "roomsDuring": 1,
+      "redisConnected": 1
+    },
+    {
+      "instance": "B",
+      "url": "http://127.0.0.1:3102",
+      "before": 0,
+      "during": 50,
+      "after": 0,
+      "roomsDuring": 1,
+      "redisConnected": 1
+    }
+  ]
+}

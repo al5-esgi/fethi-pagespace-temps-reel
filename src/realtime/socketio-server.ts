@@ -4,29 +4,18 @@ import { recordAndApply, type Operation } from '../domain.ts'
 import { findDemoProfile } from '../profiles.ts'
 import { publishOperation } from '../rest.ts'
 import { parseClientOp, type ClientOp, type Store } from '../store.ts'
-import type { CharOp, Position } from './convergence.exemple.ts'
+import type { CharOp } from './convergence.exemple.ts'
 import { DocumentCrdt, parseCharOps } from './document-crdt.ts'
+import { registerClusterSocket } from './cluster-handlers.ts'
+import type { RealtimeMetrics } from './metrics.ts'
+import type { RedisState } from './redis-state.ts'
+import type { CursorState, Member, RoomSnapshot, JoinAck, OperationAck } from './protocol.ts'
 import { RateLimiter, SECRET, verifyJwtPayload } from './security-helpers.ts'
 
 const SERVER_PORT = Number(process.env.PORT ?? 3000)
 const ALLOWED_ORIGINS = [`http://localhost:${SERVER_PORT}`, `http://127.0.0.1:${SERVER_PORT}`]
 const MAX_MESSAGES_PER_SECOND = 20
 const GRACE_PERIOD_MS = 5_000
-
-interface CursorState {
-  position: number
-  selectionStart: number
-  selectionEnd: number
-  anchors?: { position: Position | null; selectionStart: Position | null; selectionEnd: Position | null }
-}
-
-interface Member extends CursorState {
-  docId: string
-  presenceId: string
-  userId: string
-  label: string
-  color: string
-}
 
 interface InternalMember extends Member {
   socketId: string
@@ -36,18 +25,6 @@ interface RoomState {
   members: Map<string, InternalMember>
   pendingLeave: Map<string, ReturnType<typeof setTimeout>>
 }
-
-interface RoomSnapshot {
-  docId: string
-  text: string
-  version: number
-  selfId: string
-  members: Member[]
-  crdtOps: CharOp[]
-}
-
-type JoinAck = (ok: boolean, error?: string, snapshot?: RoomSnapshot) => void
-type OperationAck = (ok: boolean, error?: string) => void
 
 function publicMember(member: InternalMember): Member {
   const { socketId: _socketId, ...publicValue } = member
@@ -71,7 +48,8 @@ export function isAllowedRoom(store: Store, userId: string, room: string): boole
   return document?.ownerId === userId || document?.collaboratorIds.includes(userId) === true
 }
 
-export function startSocketIoServer(httpServer: HttpServer, store: Store): Server {
+export function startSocketIoServer(httpServer: HttpServer, store: Store,
+  options: { shared?: RedisState; metrics?: RealtimeMetrics; instance?: string } = {}): Server {
   const rooms = new Map<string, RoomState>()
   const texts = new Map<string, DocumentCrdt>()
   function documentText(docId: string): DocumentCrdt {
@@ -95,8 +73,15 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store): Serve
   const io = new Server(httpServer, {
     pingInterval: 25_000,
     pingTimeout: 20_000,
-    cors: { origin: ALLOWED_ORIGINS },
+    cors: { origin: process.env.PUBLIC_ORIGINS?.split(',') ?? ALLOWED_ORIGINS },
   })
+  options.metrics?.observe(io)
+  if (options.shared) {
+    io.adapter(options.shared.adapter())
+    options.shared.monitor((member) => io.to(`doc:${member.docId}`).emit('presence-left', {
+      docId: member.docId, presenceId: member.presenceId,
+    }))
+  }
 
   function applyBatch(docId: string, ops: CharOp[], userId: string): void {
     const document = store.documents.get(docId)!
@@ -128,7 +113,7 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store): Serve
   io.use((socket, next) => {
     const token = (socket.handshake.auth?.token as string | undefined) ?? null
     const payload = verifyJwtPayload(token, SECRET)
-    if (!payload) {
+    if (!payload || typeof payload.sub !== 'string' || !payload.sub) {
       next(new Error('unauthorized'))
       return
     }
@@ -138,6 +123,10 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store): Serve
   })
 
   io.on('connection', (socket) => {
+    if (options.shared) {
+      registerClusterSocket(io, socket, options.shared, options.metrics)
+      return
+    }
     const limiter = new RateLimiter(MAX_MESSAGES_PER_SECOND)
     let legacySequence = 0
     socket.on('disconnect', () => limiter.stop())
@@ -221,6 +210,7 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store): Serve
         selfId: presenceId,
         members: [...state.members.values()].map(publicMember),
         crdtOps: text.snapshot(),
+        instance: options.instance ?? 'solo',
       }
 
       ack(true, undefined, snapshot)
@@ -293,6 +283,7 @@ export function startSocketIoServer(httpServer: HttpServer, store: Store): Serve
         return
       }
       applyBatch(packet.docId, ops, socket.data.userId)
+      options.metrics?.acceptedBatch()
       socket.to(room).emit('crdt:op', { docId: packet.docId, ops, by: socket.data.userId })
       broadcastCursors(packet.docId)
       ack(true)
