@@ -3,6 +3,9 @@ on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
   security-events: write
+concurrency:
+  group: sast-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   sast:
     runs-on: ubuntu-latest
@@ -30,6 +33,7 @@ jobs:
           name: semgrep-sarif
           path: .security-reports/semgrep.sarif
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
   secret-detection:
     runs-on: ubuntu-latest
@@ -60,4 +64,5 @@ jobs:
           name: gitleaks-redacted
           path: .security-reports/gitleaks.*
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
