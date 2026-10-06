@@ -30,6 +30,8 @@ Ces profils sont destinés à la démonstration ; le serveur génère leur JWT v
 ```bash
 npm run typecheck
 npm run test:tp5
+npm run scenario
+npm run test:tp6
 ```
 
 Le scénario TP5 vérifie les snapshots, la présence et les curseurs par room, les droits d'accès,
@@ -53,11 +55,15 @@ Donnees de demonstration : `npm run seed` (2 documents, dont un avec un historiq
 
 ## Etat de la couche temps reel
 
-Les étapes 1 à 5 sont implémentées : SSE rattrapable, serveur WebSocket sécurisé,
+Les étapes 1 à 6 sont implémentées : SSE rattrapable, serveur WebSocket sécurisé,
 rooms Socket.IO, présence avec délai de grâce, curseurs et sélections éphémères,
-et snapshot à la connexion. Le stub initial est conservé comme référence.
-Voir `TRANSPOSITION.md` pour la progression. Le scénario de concurrence du TP6 reste dans
-`src/realtime/piege.scenario.ts` (`npm run scenario`) : la convergence simultanée est l'étape suivante.
+et snapshot à la connexion. Le CRDT de séquence fourni est branché dans le serveur et le
+navigateur : les modifications concurrentes convergent et les renvois sont idempotents.
+Les suppressions et les positions stables sont incluses dans le snapshot.
+Le stub initial est conservé comme référence. Voir `TRANSPOSITION.md` pour la progression.
+`npm run scenario` vérifie la convergence ; `npm run scenario -- --naif` montre l'ancien défaut.
+L'ADR-2 et les preuves de validation sont dans `docs/adr/0002-strategie-de-convergence.md`
+et `docs/captures/s6/`. La diffusion multi-instance est l'étape suivante (TP7).
 
 ## Structure
 
@@ -71,9 +77,12 @@ src/realtime/naive-stub.ts    LE stub a remplacer
 src/realtime/security-helpers.ts   verification JWT + Origin + RateLimiter (fourni)
 src/realtime/socketio-server.ts    rooms, presence, snapshots et curseurs
 src/realtime/s5.scenario.ts        verification automatisee du TP5
+src/realtime/document-crdt.ts      adaptateur partage du CRDT fourni
+src/realtime/s6.scenario.ts        verification de la convergence et des paquets CRDT
 src/realtime/convergence.exemple.ts  strategie de convergence adaptee (fourni, a brancher)
 src/realtime/piege.scenario.ts  le cas de concurrence a faire converger
 public/index.html          front de demonstration (2 onglets = 2 co-editeurs)
+scripts/build-client.mjs   genere les modules navigateur avant dev/start
 docs/adr/                  vos Architecture Decision Records
 ```
 

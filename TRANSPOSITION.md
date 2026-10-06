@@ -24,7 +24,8 @@ Les ADR correspondants : `docs/adr/0001` (etape 2, acceptee etape 4), `docs/adr/
 - `src/realtime/convergence.exemple.ts` : la strategie de convergence deja adaptee a ce projet
   (etape 6). Vous la branchez, vous ne la reecrivez pas.
 - `src/realtime/piege.scenario.ts` : le cas de concurrence.
-  `npm run scenario` echoue (stub) ; `npm run scenario -- --avec-strategie` reussit (strategie branchee).
+  `npm run scenario` reussit avec la strategie branchee ; `npm run scenario -- --naif`
+  conserve la demonstration du defaut initial (sortie 1 attendue).
 
 ## Constat initial (a remplir a l'etape 1)
 
@@ -32,10 +33,16 @@ Les deux onglets modifient le même texte, même lorsqu’ils sélectionnent des
 
 ## Avancement
 
-Les tranches 1 a 5 du stub sont maintenant remplacees : flux SSE rattrapable, serveur WebSocket
+Les tranches 1 a 6 du stub sont maintenant remplacees : flux SSE rattrapable, serveur WebSocket
 securise, rooms Socket.IO par document, presence avec delai de grace, curseurs et selections
 ephemeres affiches directement dans la feuille, profils de demonstration avec droits distincts,
 et snapshot complet lors du `join`.
+
+TP6 : le CRDT de sequence fourni est branche via `DocumentCrdt` dans le serveur et le navigateur.
+Les lots `crdt:op` transportent des positions stables, les suppressions conservent des tombstones,
+et le snapshot transporte l'etat CRDT. Les curseurs utilisent des ancres stables. L'ADR-2 est accepte.
+`npm run scenario` converge et `npm run test:tp6` passe ses 16 verifications. Les deux onglets
+affichent le meme texte apres des insertions concurrentes (captures dans `docs/captures/s6/`).
 
 TP5 vérifié : `npm run typecheck` et `npm run test:tp5` passent (16 vérifications).
 Les captures de snapshot, de reconnexion courte et de départ sont rangées dans

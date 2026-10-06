@@ -533,7 +533,8 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
+  <script type="module">
+    import { DocumentCrdt } from '/realtime/document-crdt.js'
     const editor = document.getElementById('editor')
     const docSelect = document.getElementById('doc')
     const status = document.getElementById('status')
@@ -556,6 +557,8 @@
     sessionStorage.setItem('pagespaceClientId', clientId)
 
     const socket = io({ autoConnect: false, auth: { clientId } })
+    window.socket = socket
+    let crdt = new DocumentCrdt(`${clientId}:${crypto.randomUUID()}`)
     const members = new Map()
     let documents = []
     let profiles = []
@@ -643,6 +646,7 @@
       const lineHeight = Number.parseFloat(getComputedStyle(editor).lineHeight) || 30
       const remoteMembers = [...members.values()]
         .filter((member) => member.presenceId !== selfId)
+        .map(resolveMember)
         .map((member) => ({ member, point: caretCoordinates(member.position) }))
         .filter(({ point }) => point.top + lineHeight >= 30 && point.top <= editor.clientHeight)
         .sort((a, b) => a.point.left - b.point.left)
@@ -693,7 +697,7 @@
     }
 
     function renderMembers() {
-      const sorted = [...members.values()].sort((a, b) =>
+      const sorted = [...members.values()].map(resolveMember).sort((a, b) =>
         Number(b.presenceId === selfId) - Number(a.presenceId === selfId),
       )
       people.innerHTML = sorted.map((member) => {
@@ -712,6 +716,13 @@
       }).join('')
       emptyPeople.hidden = sorted.length > 0
       renderRemoteCursors()
+    }
+
+    function resolveMember(member) {
+      if (!member.anchors) return member
+      return { ...member, position: crdt.offsetForAnchor(member.anchors.position),
+        selectionStart: crdt.offsetForAnchor(member.anchors.selectionStart),
+        selectionEnd: crdt.offsetForAnchor(member.anchors.selectionEnd) }
     }
 
     function updateProfileUI(profile) {
@@ -771,12 +782,14 @@
 
     function applySnapshot(snapshot) {
       applyingRemote = true
-      editor.value = snapshot.text
-      last = snapshot.text
+      crdt = new DocumentCrdt(`${clientId}:${crypto.randomUUID()}`)
+      crdt.loadSnapshot(snapshot.crdtOps)
+      editor.value = crdt.toString()
+      last = editor.value
       selfId = snapshot.selfId
       members.clear()
       for (const member of snapshot.members) members.set(member.presenceId, member)
-      const self = members.get(selfId)
+      const self = members.has(selfId) ? resolveMember(members.get(selfId)) : null
       if (self) editor.setSelectionRange(self.selectionStart, self.selectionEnd,
         self.position === self.selectionStart && self.selectionStart !== self.selectionEnd ? 'backward' : 'forward')
       applyingRemote = false
@@ -914,27 +927,19 @@
       renderMembers()
     })
 
-    socket.on('op', (op) => {
-      if (!activeRoom || op.docId !== docSelect.value) return
+    socket.on('crdt:op', ({ docId, ops }) => {
+      if (!activeRoom || docId !== docSelect.value) return
       applyingRemote = true
-      const at = Math.max(0, Math.min(op.offset, editor.value.length))
-      const selectionStart = editor.selectionStart
-      const selectionEnd = editor.selectionEnd
+      const selectionStart = crdt.anchorAt(editor.selectionStart)
+      const selectionEnd = crdt.anchorAt(editor.selectionEnd)
       const direction = editor.selectionDirection
-      let changeLength = 0
-      if (op.kind === 'insert') {
-        changeLength = (op.text ?? '').length
-        editor.value = editor.value.slice(0, at) + (op.text ?? '') + editor.value.slice(at)
-      } else {
-        const end = Math.max(at, Math.min(at + (op.length ?? 0), editor.value.length))
-        changeLength = -(end - at)
-        editor.value = editor.value.slice(0, at) + editor.value.slice(end)
-      }
-      const moveOffset = (offset) => offset < at ? offset : Math.max(at, offset + changeLength)
-      editor.setSelectionRange(moveOffset(selectionStart), moveOffset(selectionEnd), direction)
+      for (const op of ops) crdt.apply(op)
+      editor.value = crdt.toString()
+      editor.setSelectionRange(crdt.offsetForAnchor(selectionStart), crdt.offsetForAnchor(selectionEnd), direction)
       last = editor.value
       applyingRemote = false
       syncState.textContent = 'Modification recue en direct'
+      renderMembers()
       updateStats()
     })
 
@@ -948,6 +953,8 @@
           selectionStart: editor.selectionStart,
           selectionEnd: editor.selectionEnd,
         }
+        cursor.anchors = { position: crdt.anchorAt(cursor.position),
+          selectionStart: crdt.anchorAt(cursor.selectionStart), selectionEnd: crdt.anchorAt(cursor.selectionEnd) }
         socket.emit('cursor:move', cursor)
         const self = members.get(selfId)
         if (self) {
@@ -960,17 +967,19 @@
     editor.addEventListener('input', () => {
       if (applyingRemote || editor.disabled || !activeRoom) return
       const now = editor.value
-      const prefix = commonPrefix(last, now)
+      const beforeCharacters = [...last]
+      const afterCharacters = [...now]
+      const prefixCount = commonPrefix(beforeCharacters, afterCharacters)
+      const prefix = beforeCharacters.slice(0, prefixCount).join('').length
       let suffix = 0
-      while (suffix < last.length - prefix && suffix < now.length - prefix &&
-        last[last.length - suffix - 1] === now[now.length - suffix - 1]) suffix++
-      const deletedLength = last.length - prefix - suffix
-      const insertedText = now.slice(prefix, now.length - suffix)
-      const operations = []
+      while (suffix < beforeCharacters.length - prefixCount && suffix < afterCharacters.length - prefixCount &&
+        beforeCharacters[beforeCharacters.length - suffix - 1] === afterCharacters[afterCharacters.length - suffix - 1]) suffix++
+      const deletedLength = beforeCharacters.slice(prefixCount, beforeCharacters.length - suffix).join('').length
+      const insertedText = afterCharacters.slice(prefixCount, afterCharacters.length - suffix).join('')
+      const ops = crdt.deleteLocal(prefix, deletedLength)
+      ops.push(...crdt.insertLocal(prefix, insertedText))
       const generation = sessionGeneration
       const docId = docSelect.value
-      if (deletedLength) operations.push({ kind: 'delete', offset: prefix, length: deletedLength, docId })
-      if (insertedText) operations.push({ kind: 'insert', offset: prefix, text: insertedText, docId })
 
       last = now
       syncState.textContent = 'Enregistrement…'
@@ -979,9 +988,9 @@
 
       operationQueue = operationQueue.then(async () => {
         if (generation !== sessionGeneration || docId !== docSelect.value) return
-        for (const operation of operations) {
+        if (ops.length) {
           await new Promise((resolve, reject) => {
-            socket.timeout(5000).emit('op', operation, (timeoutError, ok, reason) => {
+            socket.timeout(5000).emit('crdt:op', { docId, ops }, (timeoutError, ok, reason) => {
               if (timeoutError || !ok) reject(new Error(reason ?? 'Operation non confirmee'))
               else resolve()
             })

@@ -4,12 +4,16 @@
   "type": "module",
   "description": "Editeur de documents collaboratif - template de projet temps reel",
   "scripts": {
+    "predev": "npm run build:client",
     "dev": "tsx watch src/server.ts",
+    "prestart": "npm run build:client",
     "start": "tsx src/server.ts",
+    "build:client": "node scripts/build-client.mjs",
     "seed": "tsx src/seed.ts --print",
     "scenario": "tsx src/realtime/piege.scenario.ts",
     "s3:token": "tsx src/realtime/make-token.ts",
     "test:tp5": "tsx src/realtime/s5.scenario.ts",
+    "test:tp6": "tsx src/realtime/s6.scenario.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
