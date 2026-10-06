@@ -108,6 +108,8 @@ test('Socket.IO: JWT et Origin controles sur le handshake WebSocket', async () =
   assert.equal((await emit(socket, 'join', 'doc:doc-notes'))[0], true)
   const historyLength = store.documents.get('doc-notes')!.history.length
   assert.equal((await emit(socket, 'crdt:op', { docId: 'doc-notes', ops: Array(513).fill({ type: 'delete', pos: { path: [1], site: 'attack' } }) }))[0], false)
+  assert.equal((await emit(socket, 'op', { docId: 'doc-notes', kind: 'insert', offset: 0, text: 'x'.repeat(513) }))[0], false)
+  assert.equal((await emit(socket, 'op', { docId: 'doc-notes', kind: 'delete', offset: 0, length: 513 }))[0], false)
   assert.equal(store.documents.get('doc-notes')!.history.length, historyLength)
   socket.disconnect()
 })
