@@ -1,0 +1,3 @@
+# Rapports bruts conserves sans normalisation pour preserver les preuves des scanners.
+docs/security/evidence/** linguist-generated=true -whitespace
+public/vendor/** linguist-vendored=true
