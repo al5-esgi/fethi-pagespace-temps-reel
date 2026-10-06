@@ -26,7 +26,7 @@ Branche **à ne pas fusionner** : `demo/securite-regression-20261006`, commit `1
 
 Les autres workflows de cette branche (CI, supply-chain et DAST) sont verts. La démo prouve le blocage ciblé, pas un incident d'archivage ni une panne de compilation.
 
-Findings réellement publiés, ligne 2 de `src/security-regression.ts` : [Semgrep #33](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/33) et [Gitleaks #34](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/34). Les détails et étapes ont aussi été vérifiés par l'API GitHub officielle et conservés dans `evidence/github/pipeline-results.json`.
+Findings réellement publiés, ligne 2 de `src/security-regression.ts` : [Semgrep #33](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/33) et [Gitleaks #34](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/34). Les détails et étapes ont été vérifiés par l’API officielle et dans le navigateur connecté : Semgrep Critical/CWE-798, Gitleaks High, ligne 2 et step de seuil retournant un finding bloquant puis code 1. Les données officielles sont dans `evidence/github/pipeline-results.json`.
 
 **Accès à préparer avant la soutenance** : se connecter à GitHub avec le compte ayant les droits sur le dépôt. Sans connexion, Security peut afficher 404 et les logs demandent Sign in. La branche par défaut reste main : filtrer les alertes sur la branche de démonstration ou ouvrir directement les deux liens ci-dessus. Ne pas confondre une vue sans droits/filtrée sur main avec l'absence de scan.
 
@@ -34,6 +34,7 @@ Findings réellement publiés, ligne 2 de `src/security-regression.ts` : [Semgre
 
 - `evidence/github/run-vert.jpg` et `run-rouge.jpg` : captures de vraies pages Actions, horodatage du run visible, pas des images reconstituées.
 - `evidence/github/pipeline-results.json` : états, SHA, dates, steps rouges et findings officiels.
+- `evidence/github/finding-semgrep.jpg`, `finding-gitleaks.jpg`, `step-seuil-rouge.jpg` et browser-security-proof.json : captures et lecture authentiques de Security/Actions avec le compte connecté.
 - `evidence/after/convergence-alice.jpg`, `convergence-johnny.jpg` et browser-proof.json : deux clients, même AXYB après éditions indépendantes.
 - Rapports bruts des cinq familles dans before/after ; tests de sécurité, seuils, présence/convergence et cluster ; production réelle : login demo/profiles/metrics 404, HSTS présent et utilisateur 65532.
 - `evidence/manifest.json` : empreintes SHA-256 des fichiers de preuve, sans normaliser les rapports bruts.

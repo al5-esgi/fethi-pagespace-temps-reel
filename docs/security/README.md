@@ -50,6 +50,7 @@ Connexion locale : localhost:3010, ou A/B localhost:3101 et :3102. Les sorties a
 Mesures HTTP sans afficher les jetons :
 
 ```bash
+mkdir -p .security-reports
 PROBE_URL=http://localhost:3101 node scripts/security/probe.mjs
 npm audit --json > .security-reports/npm-audit.json
 node scripts/security/gate.mjs npm .security-reports/npm-audit.json

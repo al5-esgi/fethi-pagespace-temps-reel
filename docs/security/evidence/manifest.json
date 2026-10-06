@@ -112,8 +112,12 @@
     }
   },
   "files": {
+    "github/finding-gitleaks.jpg": "46e851b16bad0dabd3ac5cfa73b70168bbec90411351b7868d5d4eaf3960c34b",
+    "github/finding-semgrep.jpg": "37d0f7d59d34a1b0cf4ee8959084886c4c8f9b932594dd6051f0989ab6abe228",
     "github/sbom.cdx.json": "d370eea561bc22a0767737dfb62d828f10d5978cecfbc32d3a2f8c53dc493d9e",
+    "github/step-seuil-rouge.jpg": "d0dd39b93ed62d020c24aa5cb1a334d348ad3c854b48500f0258fcc334f010d6",
     "github/run-rouge.jpg": "7df56df076185fcaeb20027e8b1cb38237df40cc7604281a0884c75250b45976",
+    "github/browser-security-proof.json": "c38cd552cbb4adcbcaba3acb579b04b8b39f0db0f3ea93d784758eefb2e5de0d",
     "github/pipeline-results.json": "5dc85c776c9e62fee1cb66fe1f298d9b24da7001cc2e1f440939cc78c4b39c23",
     "github/run-vert.jpg": "dd29b8f142261527a5da4a7c36be3ef0a470896c668319356be25b71db396386",
     "before/npm-audit.json": "6a5cc08fb8cda0be024a10e5de3adb3f6ec754a48ebf76087f194ab447e07904",

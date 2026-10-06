@@ -11,7 +11,7 @@
 - [x] Registre : traitements réels, finalités, bases envisagées, données, destinataires et durées actuelles/proposées distinguées.
 - [x] Points de conformité ouverts : registre et R-03/R-04/R-07. Aucune affirmation de conformité RGPD/NIS d'un service non défini.
 - [x] Tests et rapports locaux avant/après conservés : evidence/.
-- [x] Runs GitHub exécutés et findings Security vérifiés : preuves-ci.md, compte connecté requis pour la lecture dans le navigateur.
+- [x] Runs GitHub exécutés et findings Security vérifiés par API et lecture dans le navigateur connecté : preuves-ci.md et captures evidence/github/.
 - [x] Captures de vrais runs vert/rouge pour backup : evidence/github/, horodatages visibles et source officielle conservée.
 - [ ] Validation chronométrée de la soutenance commune et entraînement Q&A : à faire avec l'étudiant.
 
