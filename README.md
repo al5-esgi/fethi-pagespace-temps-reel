@@ -18,11 +18,32 @@ Avec Docker :
 docker compose up --build
 ```
 
+## Essayer l'éditeur à deux
+
+Ouvrir `http://localhost:3000/?profile=demo-user` et `http://localhost:3000/?profile=alice`
+dans deux onglets. Choisir **Notes de reunion** dans les deux : le texte, les curseurs et les
+sélections sont partagés en direct. Le sélecteur en haut permet de changer de profil.
+
+Johnny, Alice et Bob peuvent collaborer sur les notes. Seule Alice peut ouvrir **Brief produit**.
+Ces profils sont destinés à la démonstration ; le serveur génère leur JWT via `/api/auth/demo`.
+
+```bash
+npm run typecheck
+npm run test:tp5
+```
+
+Le scénario TP5 vérifie les snapshots, la présence et les curseurs par room, les droits d'accès,
+la reconnexion avant cinq secondes et le départ après expiration du délai de grâce. Il démarre
+son propre serveur sur un port libre et utilise des documents isolés.
+Les captures et les manipulations sont dans [docs/captures/s5/README.md](docs/captures/s5/README.md).
+
 ## API REST
 
 | Methode | Route | Description |
 |---|---|---|
 | GET | `/api/docs` | liste des documents |
+| GET | `/api/profiles` | profils de démonstration |
+| POST | `/api/auth/demo` | connexion de démonstration (`{ "profileId": "alice" }`) |
 | GET | `/api/docs/:id` | un document (texte rendu) |
 | GET | `/api/docs/:id/history` | l'historique des operations |
 | GET | `/api/docs/:id/snapshot` | instantane (blocs + version) |
@@ -32,10 +53,11 @@ Donnees de demonstration : `npm run seed` (2 documents, dont un avec un historiq
 
 ## Etat de la couche temps reel
 
-La synchronisation temps reel est aujourd'hui un **stub volontairement naif**
-(`src/realtime/naive-stub.ts`). Il fonctionne mal, et c'est voulu : voir `TRANSPOSITION.md` pour
-ce qui est a corriger et dans quel ordre. Le scenario du probleme de convergence est dans
-`src/realtime/piege.scenario.ts` (`npm run scenario`).
+Les étapes 1 à 5 sont implémentées : SSE rattrapable, serveur WebSocket sécurisé,
+rooms Socket.IO, présence avec délai de grâce, curseurs et sélections éphémères,
+et snapshot à la connexion. Le stub initial est conservé comme référence.
+Voir `TRANSPOSITION.md` pour la progression. Le scénario de concurrence du TP6 reste dans
+`src/realtime/piege.scenario.ts` (`npm run scenario`) : la convergence simultanée est l'étape suivante.
 
 ## Structure
 
@@ -47,6 +69,8 @@ src/server.ts              point d'entree (REST + front + temps reel)
 src/seed.ts                donnees de demonstration
 src/realtime/naive-stub.ts    LE stub a remplacer
 src/realtime/security-helpers.ts   verification JWT + Origin + RateLimiter (fourni)
+src/realtime/socketio-server.ts    rooms, presence, snapshots et curseurs
+src/realtime/s5.scenario.ts        verification automatisee du TP5
 src/realtime/convergence.exemple.ts  strategie de convergence adaptee (fourni, a brancher)
 src/realtime/piege.scenario.ts  le cas de concurrence a faire converger
 public/index.html          front de demonstration (2 onglets = 2 co-editeurs)

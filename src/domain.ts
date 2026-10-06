@@ -19,6 +19,7 @@ export interface Document {
   id: string
   title: string
   ownerId: string
+  collaboratorIds: string[]
   blocs: Bloc[]
   history: Operation[]
 }
@@ -41,8 +42,16 @@ export function createDocument(
   title: string,
   initial = '',
   ownerId = 'demo-user',
+  collaboratorIds: string[] = [],
 ): Document {
-  return { id, title, ownerId, blocs: [{ id: `${id}-b1`, text: initial }], history: [] }
+  return {
+    id,
+    title,
+    ownerId,
+    collaboratorIds,
+    blocs: [{ id: `${id}-b1`, text: initial }],
+    history: [],
+  }
 }
 
 export function recordAndApply(doc: Document, op: Operation): void {

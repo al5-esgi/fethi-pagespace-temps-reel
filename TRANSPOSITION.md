@@ -29,3 +29,14 @@ Les ADR correspondants : `docs/adr/0001` (etape 2, acceptee etape 4), `docs/adr/
 ## Constat initial (a remplir a l'etape 1)
 
 Les deux onglets modifient le même texte, même lorsqu’ils sélectionnent des documents différents, car le serveur utilise un unique buffer et ignore le `docId`. Les curseurs ne sont pas partagés, car leur position n’est ni envoyée ni stockée. Au rechargement, seul le texte est restauré : la position du curseur est donc perdue.
+
+## Avancement
+
+Les tranches 1 a 5 du stub sont maintenant remplacees : flux SSE rattrapable, serveur WebSocket
+securise, rooms Socket.IO par document, presence avec delai de grace, curseurs et selections
+ephemeres affiches directement dans la feuille, profils de demonstration avec droits distincts,
+et snapshot complet lors du `join`.
+
+TP5 vérifié : `npm run typecheck` et `npm run test:tp5` passent (16 vérifications).
+Les captures de snapshot, de reconnexion courte et de départ sont rangées dans
+`docs/captures/s5/`, avec les manipulations et résultats dans son `README.md`.

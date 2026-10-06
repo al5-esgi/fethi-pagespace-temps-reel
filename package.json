@@ -9,6 +9,7 @@
     "seed": "tsx src/seed.ts --print",
     "scenario": "tsx src/realtime/piege.scenario.ts",
     "s3:token": "tsx src/realtime/make-token.ts",
+    "test:tp5": "tsx src/realtime/s5.scenario.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

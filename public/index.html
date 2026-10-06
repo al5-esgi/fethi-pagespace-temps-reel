@@ -3,134 +3,1017 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Editeur collaboratif</title>
+  <meta name="color-scheme" content="light" />
+  <title>Pagespace — Editeur collaboratif</title>
   <style>
-    body { font: 14px system-ui, sans-serif; margin: 1.5rem; max-width: 780px; }
-    header { display: flex; gap: 1rem; align-items: baseline; }
-    select, button { font: inherit; padding: 2px 6px; }
-    textarea { width: 100%; height: 40vh; font: 14px ui-monospace, monospace; margin-top: .5rem; }
-    .hint { color: #666; }
-    #status { font-family: ui-monospace, monospace; }
+    :root {
+      --ink: #1d1d1f;
+      --muted: #6e6e73;
+      --quiet: #8e8e93;
+      --line: rgba(29, 29, 31, .09);
+      --surface: rgba(255, 255, 255, .78);
+      --surface-strong: rgba(255, 255, 255, .94);
+      --blue: #007aff;
+      --green: #24a148;
+      --red: #ff3b30;
+      --shadow: 0 24px 70px rgba(49, 50, 58, .14), 0 3px 12px rgba(49, 50, 58, .06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(168, 205, 255, .55), transparent 30%),
+        radial-gradient(circle at 90% 5%, rgba(224, 192, 255, .46), transparent 28%),
+        linear-gradient(145deg, #f8faff 0%, #f2f3f8 48%, #faf9fd 100%);
+      overflow-x: hidden;
+    }
+
+    button, select, textarea { font: inherit; }
+
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.24) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.24) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 70%);
+    }
+
+    .app {
+      position: relative;
+      width: min(1540px, calc(100% - 40px));
+      min-height: calc(100vh - 40px);
+      margin: 20px auto;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .86);
+      border-radius: 28px;
+      background: rgba(247, 248, 252, .72);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(28px) saturate(145%);
+    }
+
+    .topbar {
+      height: 74px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .58);
+    }
+
+    .brand, .topbar-actions, .profile-control, .status-pill, .document-picker, .toolbar, .person, .activity-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .brand { gap: 12px; }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      color: white;
+      border-radius: 11px;
+      background: linear-gradient(145deg, #1e8cff, #5956d6);
+      box-shadow: 0 8px 20px rgba(0, 122, 255, .24), inset 0 1px rgba(255,255,255,.38);
+    }
+
+    .brand-name { font-weight: 700; letter-spacing: -.03em; font-size: 18px; }
+    .brand-subtitle { margin-top: 1px; color: var(--muted); font-size: 12px; }
+
+    .topbar-actions { gap: 10px; }
+
+    .profile-control {
+      gap: 9px;
+      padding: 5px 9px 5px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .78);
+    }
+
+    .profile-avatar {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      color: white;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 760;
+    }
+
+    #profileSelect {
+      max-width: 150px;
+      padding: 3px 20px 3px 2px;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .status-pill {
+      gap: 8px;
+      max-width: 360px;
+      padding: 8px 12px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .72);
+      font-size: 12px;
+      font-weight: 600;
+      transition: .2s ease;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--quiet);
+      box-shadow: 0 0 0 4px rgba(142, 142, 147, .12);
+    }
+
+    .status-pill.connected .status-dot { background: #30d158; box-shadow: 0 0 0 4px rgba(48,209,88,.13); }
+    .status-pill.error .status-dot { background: var(--red); box-shadow: 0 0 0 4px rgba(255,59,48,.12); }
+
+    .workspace {
+      min-height: calc(100vh - 115px);
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr) 292px;
+    }
+
+    .sidebar, .presence-panel { padding: 24px 18px; }
+    .sidebar { border-right: 1px solid var(--line); }
+    .presence-panel { border-left: 1px solid var(--line); }
+
+    .section-label {
+      margin: 0 8px 10px;
+      color: var(--quiet);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav-card {
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.72);
+      border-radius: 16px;
+      background: rgba(255,255,255,.55);
+      box-shadow: 0 5px 18px rgba(31,35,48,.04);
+    }
+
+    .nav-title { font-size: 13px; font-weight: 650; }
+    .nav-copy { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .feature-list { margin: 22px 0 0; padding: 0; list-style: none; }
+    .feature-list li {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .feature-icon { width: 23px; color: var(--blue); text-align: center; }
+
+    .editor-zone { padding: 26px; min-width: 0; }
+
+    .editor-card {
+      height: 100%;
+      min-height: 690px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.85);
+      border-radius: 22px;
+      background: var(--surface-strong);
+      box-shadow: 0 16px 50px rgba(33,37,49,.08);
+    }
+
+    .editor-header {
+      min-height: 78px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .document-picker { gap: 12px; min-width: 0; }
+    .document-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--blue);
+      border-radius: 11px;
+      background: #eef6ff;
+    }
+
+    #doc {
+      max-width: 280px;
+      padding: 7px 30px 7px 10px;
+      color: var(--ink);
+      border: 0;
+      outline: 0;
+      border-radius: 9px;
+      background: transparent;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .document-meta { margin-top: 2px; color: var(--quiet); font-size: 11px; }
+
+    .access-badge {
+      padding: 6px 9px;
+      border-radius: 999px;
+      color: #137333;
+      background: #eaf8ee;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .access-badge.denied { color: #b42318; background: #fff0ee; }
+
+    .toolbar {
+      gap: 3px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #f7f7f9;
+    }
+
+    .tool-button {
+      width: 30px;
+      height: 28px;
+      border: 0;
+      border-radius: 7px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .tool-button:hover { color: var(--ink); background: white; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+
+    .paper {
+      flex: 1;
+      padding: clamp(28px, 5vw, 72px);
+      background: linear-gradient(180deg, #fff 0%, #fdfdfd 100%);
+    }
+
+    .editor-stack {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+    }
+
+    #editor {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+      resize: none;
+      border: 0;
+      outline: 0;
+      color: #262629;
+      background: transparent;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+      font-size: clamp(15px, 1.15vw, 17px);
+      line-height: 1.8;
+      caret-color: var(--blue);
+      padding: 30px 0 0;
+      tab-size: 4;
+    }
+    #editor:disabled { color: #a1a1a6; cursor: not-allowed; }
+    #editor::selection { color: #11264a; background: rgba(0,122,255,.18); }
+
+    #cursorLayer, #caretMirror {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+      font-size: clamp(15px, 1.15vw, 17px);
+      line-height: 1.8;
+      padding: 30px 0 0;
+      tab-size: 4;
+    }
+
+    #caretMirror { visibility: hidden; overflow: visible; }
+
+    .remote-caret {
+      position: absolute;
+      z-index: 3;
+      width: 2px;
+      height: 1.8em;
+      border-radius: 2px;
+      transition: left 70ms linear, top 70ms linear;
+    }
+
+    .remote-caret-label {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% - 1px);
+      max-width: 150px;
+      padding: 3px 7px;
+      overflow: hidden;
+      color: white;
+      border-radius: 6px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,.16);
+    }
+
+    .remote-selection {
+      position: absolute;
+      z-index: 1;
+      min-width: 2px;
+      border-radius: 2px;
+      opacity: .14;
+      mix-blend-mode: multiply;
+    }
+
+    .editor-footer {
+      min-height: 48px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--quiet);
+      border-top: 1px solid var(--line);
+      background: #fbfbfc;
+      font-size: 11px;
+    }
+    .stats { display: flex; gap: 16px; }
+
+    .panel-title { margin: 2px 6px 4px; font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+    .panel-subtitle { margin: 0 6px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+
+    .people { display: grid; gap: 8px; }
+    .person {
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.76);
+      border-radius: 13px;
+      background: rgba(255,255,255,.6);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: white;
+      border-radius: 50%;
+      box-shadow: inset 0 1px rgba(255,255,255,.3);
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .person-copy { min-width: 0; flex: 1; }
+    .person-name { display: block; overflow: hidden; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+    .person-cursor { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #30d158; }
+
+    .empty-state {
+      padding: 22px 14px;
+      color: var(--quiet);
+      border: 1px dashed rgba(29,29,31,.12);
+      border-radius: 14px;
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .divider { height: 1px; margin: 24px 6px; background: var(--line); }
+    .activity { display: grid; gap: 12px; }
+    .activity-item { align-items: flex-start; gap: 9px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+    .activity-bullet { width: 7px; height: 7px; margin-top: 4px; flex: 0 0 auto; border-radius: 50%; background: #c7c7cc; }
+    .activity-time { color: #aeaeb2; }
+
+    @media (max-width: 1050px) {
+      .workspace { grid-template-columns: minmax(0, 1fr) 260px; }
+      .sidebar { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      .app { width: 100%; min-height: 100vh; margin: 0; border-radius: 0; }
+      .workspace { display: block; }
+      .presence-panel { border: 0; border-top: 1px solid var(--line); }
+      .editor-zone { padding: 12px; }
+      .editor-card { min-height: 620px; }
+      .toolbar { display: none; }
+      .topbar { padding: 0 16px; }
+      .brand-subtitle { display: none; }
+      #profileSelect { max-width: 105px; }
+      .status-pill { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .paper { padding: 28px 24px; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Editeur collaboratif</h1>
-    <label>document :
-      <select id="doc"></select>
-    </label>
-    <span id="status">deconnecte</span>
-  </header>
-  <p class="hint">
-    Ouvrez cette page dans 2 onglets sur le meme document : les operations sont partagees dans
-    sa room. Un utilisateur ne peut rejoindre que les documents dont il est proprietaire.
-  </p>
-  <textarea id="editor" spellcheck="false"></textarea>
+  <div class="ambient"></div>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M6 4.75h8.8L18 7.95V19.25H6V4.75Z" stroke="currentColor" stroke-width="1.7" />
+            <path d="M14.5 4.9V8.2H17.8M8.8 11H15.2M8.8 14H15.2M8.8 17H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">Pagespace</div>
+          <div class="brand-subtitle">Collaborative writing, beautifully simple.</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <label class="profile-control" title="Changer de profil">
+          <span id="profileAvatar" class="profile-avatar">?</span>
+          <select id="profileSelect" aria-label="Profil"></select>
+        </label>
+        <div id="statusPill" class="status-pill">
+          <span class="status-dot"></span>
+          <span id="status">Connexion…</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar">
+        <p class="section-label">Espace de travail</p>
+        <div class="nav-card">
+          <div class="nav-title">Edition temps reel</div>
+          <p class="nav-copy">Chaque document dispose de sa room privee et de son propre etat partage.</p>
+        </div>
+        <ul class="feature-list">
+          <li><span class="feature-icon">◈</span> Synchronisation live</li>
+          <li><span class="feature-icon">◎</span> Presence par room</li>
+          <li><span class="feature-icon">✓</span> Operations confirmees</li>
+          <li><span class="feature-icon">↻</span> Reconnexion automatique</li>
+        </ul>
+      </aside>
+
+      <section class="editor-zone">
+        <article class="editor-card">
+          <header class="editor-header">
+            <div class="document-picker">
+              <div class="document-icon" aria-hidden="true">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 3.75h7.7L18 7.05v13.2H7V3.75Z" stroke="currentColor" stroke-width="1.6" />
+                  <path d="M14.5 4V7.3H17.7" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </div>
+              <div>
+                <select id="doc" aria-label="Document"></select>
+                <div id="documentMeta" class="document-meta">Chargement du document…</div>
+              </div>
+              <span id="accessBadge" class="access-badge">Lecture seule</span>
+            </div>
+            <div class="toolbar" aria-label="Mise en forme">
+              <button class="tool-button" type="button" title="Gras">B</button>
+              <button class="tool-button" type="button" title="Italique"><em>I</em></button>
+              <button class="tool-button" type="button" title="Liste">≡</button>
+            </div>
+          </header>
+
+          <div class="paper">
+            <div class="editor-stack">
+              <textarea id="editor" spellcheck="true" aria-label="Contenu du document" placeholder="Commencez a ecrire…"></textarea>
+              <div id="cursorLayer" aria-hidden="true"></div>
+              <div id="caretMirror" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <footer class="editor-footer">
+            <div class="stats">
+              <span id="wordCount">0 mot</span>
+              <span id="charCount">0 caractere</span>
+              <span id="cursorPosition">Position 0</span>
+            </div>
+            <span id="syncState">En attente de synchronisation</span>
+          </footer>
+        </article>
+      </section>
+
+      <aside class="presence-panel">
+        <h2 class="panel-title">Collaborateurs</h2>
+        <p class="panel-subtitle">Curseurs et selections visibles en direct dans cette room.</p>
+        <div id="people" class="people"></div>
+        <div id="emptyPeople" class="empty-state">Aucun collaborateur dans ce document.</div>
+
+        <div class="divider"></div>
+        <h2 class="panel-title">Activite</h2>
+        <p class="panel-subtitle">Les derniers evenements de votre session.</p>
+        <div id="activity" class="activity"></div>
+      </aside>
+    </main>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const me = 'u' + Math.floor(Math.random() * 1000)
     const editor = document.getElementById('editor')
+    const docSelect = document.getElementById('doc')
     const status = document.getElementById('status')
-    const docSel = document.getElementById('doc')
+    const statusPill = document.getElementById('statusPill')
+    const accessBadge = document.getElementById('accessBadge')
+    const documentMeta = document.getElementById('documentMeta')
+    const syncState = document.getElementById('syncState')
+    const people = document.getElementById('people')
+    const emptyPeople = document.getElementById('emptyPeople')
+    const activity = document.getElementById('activity')
+    const wordCount = document.getElementById('wordCount')
+    const charCount = document.getElementById('charCount')
+    const cursorPosition = document.getElementById('cursorPosition')
+    const profileSelect = document.getElementById('profileSelect')
+    const profileAvatar = document.getElementById('profileAvatar')
+    const cursorLayer = document.getElementById('cursorLayer')
+    const caretMirror = document.getElementById('caretMirror')
+
+    const clientId = sessionStorage.getItem('pagespaceClientId') ?? crypto.randomUUID()
+    sessionStorage.setItem('pagespaceClientId', clientId)
+
+    const socket = io({ autoConnect: false, auth: { clientId } })
+    const members = new Map()
+    let documents = []
+    let profiles = []
+    let currentProfile = null
+    let selfId = ''
+    let activeRoom = ''
     let applyingRemote = false
+    let ignoreNextDisconnect = false
+    let sessionGeneration = 0
     let last = ''
+    let cursorFrame = 0
+    let operationQueue = Promise.resolve()
+
     editor.disabled = true
 
-    fetch('/api/docs').then((r) => r.json()).then((docs) => {
-      docSel.innerHTML = docs.map((d) => `<option value="${d.id}">${d.title}</option>`).join('')
-      if (socket.connected) joinSelectedDocument()
-    })
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+      })[char])
+    }
 
-    const token = new URLSearchParams(location.search).get('token') ?? ''
-    const socket = io({ auth: { token } })
+    function setStatus(message, tone = '') {
+      status.textContent = message
+      statusPill.className = `status-pill ${tone}`
+    }
 
-    socket.on('connect', () => {
-      status.textContent = 'connecte ' + me
-      joinSelectedDocument()
-    })
-    socket.on('disconnect', () => {
-      status.textContent = 'deconnecte'
-      editor.disabled = true
-    })
-    socket.on('connect_error', (error) => {
-      status.textContent = 'refuse : ' + error.message
-      editor.disabled = true
-    })
-    socket.io.on('reconnect', (attempt) => {
-      console.log('reconnecte apres', attempt, 'tentative(s)')
-    })
+    function setAccess(allowed) {
+      accessBadge.textContent = allowed ? 'Modification' : 'Acces refuse'
+      accessBadge.classList.toggle('denied', !allowed)
+      editor.disabled = !allowed
+      renderRemoteCursors()
+    }
 
-    socket.on('snapshot', (snapshot) => {
-      if (snapshot.docId !== docSel.value) return
+    function addActivity(message) {
+      const time = new Intl.DateTimeFormat('fr', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date())
+      const item = document.createElement('div')
+      item.className = 'activity-item'
+      item.innerHTML = `<span class="activity-bullet"></span><span>${escapeHtml(message)} <span class="activity-time">· ${time}</span></span>`
+      activity.prepend(item)
+      while (activity.children.length > 6) activity.lastElementChild.remove()
+    }
+
+    function initials(label) {
+      return label.split(/[\s·]+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+    }
+
+    function caretCoordinates(offset) {
+      const safeOffset = Math.max(0, Math.min(Number(offset) || 0, editor.value.length))
+      caretMirror.style.width = `${editor.clientWidth}px`
+      caretMirror.replaceChildren(document.createTextNode(editor.value.slice(0, safeOffset)))
+      const marker = document.createElement('span')
+      marker.textContent = '\u200b'
+      caretMirror.append(marker)
+      return {
+        left: marker.offsetLeft - editor.scrollLeft,
+        top: marker.offsetTop - editor.scrollTop,
+      }
+    }
+
+    function selectionRectangles(from, to) {
+      const startOffset = Math.max(0, Math.min(Number(from) || 0, editor.value.length))
+      const endOffset = Math.max(startOffset, Math.min(Number(to) || 0, editor.value.length))
+      if (startOffset === endOffset) return []
+
+      caretMirror.style.width = `${editor.clientWidth}px`
+      const textNode = document.createTextNode(editor.value)
+      caretMirror.replaceChildren(textNode)
+      const range = document.createRange()
+      range.setStart(textNode, startOffset)
+      range.setEnd(textNode, endOffset)
+      const mirrorBounds = caretMirror.getBoundingClientRect()
+
+      return [...range.getClientRects()].map((rectangle) => ({
+        left: rectangle.left - mirrorBounds.left - editor.scrollLeft,
+        top: rectangle.top - mirrorBounds.top - editor.scrollTop,
+        width: rectangle.width,
+        height: rectangle.height,
+      }))
+    }
+
+    function renderRemoteCursors() {
+      cursorLayer.replaceChildren()
+      if (editor.disabled) return
+
+      const lineHeight = Number.parseFloat(getComputedStyle(editor).lineHeight) || 30
+      const remoteMembers = [...members.values()]
+        .filter((member) => member.presenceId !== selfId)
+        .map((member) => ({ member, point: caretCoordinates(member.position) }))
+        .filter(({ point }) => point.top + lineHeight >= 30 && point.top <= editor.clientHeight)
+        .sort((a, b) => a.point.left - b.point.left)
+      let nextLabelLeft = 3
+
+      for (const { member, point } of remoteMembers) {
+
+        const from = Math.min(member.selectionStart, member.selectionEnd)
+        const to = Math.max(member.selectionStart, member.selectionEnd)
+        for (const rectangle of selectionRectangles(from, to)) {
+          const left = Math.max(0, rectangle.left)
+          const right = Math.min(editor.clientWidth, rectangle.left + rectangle.width)
+          if (right <= left || rectangle.top + rectangle.height < 0 || rectangle.top > editor.clientHeight) continue
+
+          const selection = document.createElement('span')
+          selection.className = 'remote-selection'
+          selection.style.left = `${left}px`
+          selection.style.top = `${rectangle.top}px`
+          selection.style.width = `${Math.max(2, right - left)}px`
+          selection.style.height = `${rectangle.height}px`
+          selection.style.background = member.color
+          cursorLayer.append(selection)
+        }
+
+        const caret = document.createElement('span')
+        caret.className = 'remote-caret'
+        caret.style.left = `${point.left}px`
+        caret.style.top = `${point.top}px`
+        caret.style.height = `${lineHeight}px`
+        caret.style.background = member.color
+
+        const label = document.createElement('span')
+        label.className = 'remote-caret-label'
+        label.style.background = member.color
+        label.textContent = member.label
+        caret.append(label)
+        cursorLayer.append(caret)
+
+        const labelWidth = label.offsetWidth
+        const maxLabelLeft = Math.max(3, cursorLayer.clientWidth - labelWidth - 3)
+        const preferredLabelLeft = Math.max(3, Math.min(point.left, maxLabelLeft))
+        const labelLeft = Math.min(maxLabelLeft, Math.max(preferredLabelLeft, nextLabelLeft))
+        label.style.left = `${labelLeft - point.left}px`
+        label.style.top = `${2 - point.top}px`
+        label.style.bottom = 'auto'
+        nextLabelLeft = labelLeft + labelWidth + 6
+      }
+    }
+
+    function renderMembers() {
+      const sorted = [...members.values()].sort((a, b) =>
+        Number(b.presenceId === selfId) - Number(a.presenceId === selfId),
+      )
+      people.innerHTML = sorted.map((member) => {
+        const selection = member.selectionStart !== member.selectionEnd
+          ? `Selection ${member.selectionStart}–${member.selectionEnd}`
+          : `Curseur a ${member.position}`
+        const name = member.presenceId === selfId ? `${member.label} (vous)` : member.label
+        return `<div class="person">
+          <span class="avatar" style="background:${escapeHtml(member.color)}">${escapeHtml(initials(member.label))}</span>
+          <span class="person-copy">
+            <span class="person-name">${escapeHtml(name)}</span>
+            <span class="person-cursor">${escapeHtml(selection)}</span>
+          </span>
+          <span class="live-dot" title="En ligne"></span>
+        </div>`
+      }).join('')
+      emptyPeople.hidden = sorted.length > 0
+      renderRemoteCursors()
+    }
+
+    function updateProfileUI(profile) {
+      currentProfile = profile
+      profileAvatar.textContent = profile?.initials ?? '?'
+      profileAvatar.style.background = profile?.color ?? '#8e8e93'
+      profileSelect.title = profile ? `${profile.name} · ${profile.role}` : 'Choisir un profil'
+    }
+
+    async function signIn(profileId) {
+      const generation = ++sessionGeneration
+      setAccess(false)
+      setStatus('Changement de profil…')
+      syncState.textContent = 'Authentification…'
+
+      try {
+        const response = await fetch('/api/auth/demo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profileId }),
+        })
+        if (!response.ok) throw new Error('profil inconnu')
+        const { token, profile } = await response.json()
+        if (generation !== sessionGeneration) return
+
+        const wasConnected = socket.connected
+        if (wasConnected || socket.active) {
+          if (wasConnected) ignoreNextDisconnect = true
+          socket.disconnect()
+        }
+
+        activeRoom = ''
+        selfId = ''
+        members.clear()
+        renderMembers()
+        updateProfileUI(profile)
+        sessionStorage.setItem('pagespaceProfileId', profile.id)
+        const profileUrl = new URL(location.href)
+        profileUrl.searchParams.set('profile', profile.id)
+        history.replaceState(null, '', profileUrl)
+        socket.auth = { token, clientId }
+        socket.connect()
+        addActivity(`Connecte en tant que ${profile.name}`)
+      } catch (error) {
+        setStatus(`Profil refuse : ${error.message}`, 'error')
+        syncState.textContent = 'Authentification impossible'
+      }
+    }
+
+    function updateStats() {
+      const text = editor.value
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0
+      wordCount.textContent = `${words} mot${words > 1 ? 's' : ''}`
+      charCount.textContent = `${text.length} caractere${text.length > 1 ? 's' : ''}`
+      cursorPosition.textContent = `Position ${editor.selectionStart}`
+    }
+
+    function applySnapshot(snapshot) {
       applyingRemote = true
       editor.value = snapshot.text
       last = snapshot.text
+      selfId = snapshot.selfId
+      members.clear()
+      for (const member of snapshot.members) members.set(member.presenceId, member)
+      const self = members.get(selfId)
+      if (self) editor.setSelectionRange(self.selectionStart, self.selectionEnd,
+        self.position === self.selectionStart && self.selectionStart !== self.selectionEnd ? 'backward' : 'forward')
       applyingRemote = false
-    })
-
-    socket.on('op', (op) => {
-      if (op.docId !== docSel.value) return
-      applyingRemote = true
-      const at = Math.max(0, Math.min(op.offset, editor.value.length))
-      if (op.kind === 'insert') {
-        editor.value = editor.value.slice(0, at) + (op.text ?? '') + editor.value.slice(at)
-      } else {
-        const end = Math.max(at, Math.min(at + (op.length ?? 0), editor.value.length))
-        editor.value = editor.value.slice(0, at) + editor.value.slice(end)
-      }
-      last = editor.value
-      applyingRemote = false
-    })
+      documentMeta.textContent = `Version ${snapshot.version} · Snapshot synchronise`
+      syncState.textContent = 'Toutes les modifications sont synchronisees'
+      renderMembers()
+      updateStats()
+    }
 
     function joinSelectedDocument() {
-      if (!socket.connected || !docSel.value) return
-      editor.disabled = true
-      socket.timeout(5000).emit('join', `doc:${docSel.value}`, (error, ok, reason) => {
-        if (error) {
-          status.textContent = 'join : timeout'
+      if (!socket.connected || !docSelect.value) return
+      const generation = sessionGeneration
+      const requestedDocumentId = docSelect.value
+      activeRoom = ''
+      setAccess(false)
+      setStatus('Acces au document…')
+      syncState.textContent = 'Synchronisation…'
+
+      socket.timeout(5000).emit('join', `doc:${docSelect.value}`, (timeoutError, ok, reason, snapshot) => {
+        if (generation !== sessionGeneration || requestedDocumentId !== docSelect.value) return
+        if (timeoutError) {
+          setStatus('Le serveur ne repond pas', 'error')
+          syncState.textContent = 'Echec de synchronisation'
+          addActivity('Le join a expire')
           return
         }
-        if (!ok) {
-          status.textContent = 'refuse : ' + reason
+        if (!ok || !snapshot) {
+          activeRoom = ''
+          editor.value = ''
+          last = ''
+          members.clear()
+          renderMembers()
+          updateStats()
+          setAccess(false)
+          setStatus(reason ?? 'Room non autorisee', 'error')
+          documentMeta.textContent = 'Ce document appartient a un autre utilisateur'
+          syncState.textContent = 'Aucune modification autorisee'
+          addActivity(`Acces refuse a doc:${docSelect.value}`)
           return
         }
-        status.textContent = 'connecte a doc:' + docSel.value
-        editor.disabled = false
+
+        activeRoom = `doc:${docSelect.value}`
+        applySnapshot(snapshot)
+        setAccess(true)
+        setStatus(`Connecte a ${activeRoom}`, 'connected')
+        addActivity(`Room ${activeRoom} rejointe`)
       })
     }
 
-    docSel.addEventListener('change', joinSelectedDocument)
+    async function boot() {
+      try {
+        const [docsResponse, profilesResponse] = await Promise.all([
+          fetch('/api/docs'),
+          fetch('/api/profiles'),
+        ])
+        if (!docsResponse.ok || !profilesResponse.ok) throw new Error('donnees indisponibles')
+        documents = await docsResponse.json()
+        profiles = await profilesResponse.json()
+        docSelect.innerHTML = documents.map((doc) =>
+          `<option value="${escapeHtml(doc.id)}">${escapeHtml(doc.title)}</option>`,
+        ).join('')
+        profileSelect.innerHTML = profiles.map((profile) =>
+          `<option value="${escapeHtml(profile.id)}">${escapeHtml(profile.name)}</option>`,
+        ).join('')
 
-    // Diff naif : on compare avant/apres et on envoie une insertion ou une suppression.
-    editor.addEventListener('input', () => {
-      if (applyingRemote) return
-      const now = editor.value
-      const prefix = commonPrefix(last, now)
-      let operation = null
-      if (now.length > last.length) {
-        operation = {
-          kind: 'insert', offset: prefix, text: now.slice(prefix, prefix + (now.length - last.length)),
-          by: me, docId: docSel.value,
-        }
-      } else if (now.length < last.length) {
-        operation = {
-          kind: 'delete', offset: prefix, length: last.length - now.length, by: me, docId: docSel.value,
-        }
+        const requestedProfile = new URLSearchParams(location.search).get('profile')
+        const savedProfile = sessionStorage.getItem('pagespaceProfileId')
+        const profileId = profiles.some((profile) => profile.id === requestedProfile)
+          ? requestedProfile
+          : profiles.some((profile) => profile.id === savedProfile) ? savedProfile : profiles[0]?.id
+        if (!profileId) throw new Error('aucun profil disponible')
+        profileSelect.value = profileId
+        await signIn(profileId)
+      } catch (error) {
+        setStatus(`Initialisation impossible : ${error.message}`, 'error')
       }
-      last = now
-      if (operation) {
-        socket.timeout(5000).emit('op', operation, (error, ok, reason) => {
-          if (error || !ok) console.error('operation refusee :', reason ?? 'timeout')
-        })
-      }
+    }
+
+    socket.on('connect', () => {
+      setStatus('Connecte au serveur', 'connected')
+      if (documents.length) joinSelectedDocument()
     })
 
-    function commonPrefix(a, b) {
-      let i = 0
-      while (i < a.length && i < b.length && a[i] === b[i]) i++
-      return i
+    socket.on('disconnect', () => {
+      if (ignoreNextDisconnect) {
+        ignoreNextDisconnect = false
+        return
+      }
+      setStatus('Reconnexion…')
+      setAccess(false)
+      addActivity('Connexion interrompue, delai de grace actif')
+    })
+
+    socket.on('connect_error', (error) => {
+      setStatus(`Refuse : ${error.message}`, 'error')
+      setAccess(false)
+    })
+
+    socket.io.on('reconnect', (attempt) => {
+      console.log('reconnecte apres', attempt, 'tentative(s)')
+      addActivity(`Reconnecte apres ${attempt} tentative${attempt > 1 ? 's' : ''}`)
+    })
+
+    socket.on('presence-joined', (member) => {
+      if (!activeRoom || member.docId !== docSelect.value) return
+      members.set(member.presenceId, member)
+      renderMembers()
+      addActivity(`${member.label} a rejoint le document`)
+    })
+
+    socket.on('presence-restored', (member) => {
+      if (!activeRoom || member.docId !== docSelect.value) return
+      members.set(member.presenceId, member)
+      renderMembers()
+      addActivity(`${member.label} reconnecte sans depart`)
+    })
+
+    socket.on('presence-left', ({ docId, presenceId }) => {
+      if (!activeRoom || docId !== docSelect.value) return
+      const member = members.get(presenceId)
+      members.delete(presenceId)
+      renderMembers()
+      addActivity(`${member?.label ?? 'Un collaborateur'} est parti`)
+    })
+
+    socket.on('cursor:move', (member) => {
+      if (!activeRoom || member.docId !== docSelect.value) return
+      members.set(member.presenceId, member)
+      renderMembers()
+    })
+
+    socket.on('cursors:update', ({ docId, members: updatedMembers }) => {
+      if (!activeRoom || docId !== docSelect.value) return
+      for (const member of updatedMembers) members.set(member.presenceId, member)
+      renderMembers()
+    })
+
+    socket.on('op', (op) => {
+      if (!activeRoom || op.docId !== docSelect.value) return
+      applyingRemote = true
+      const at = Math.max(0, Math.min(op.offset, editor.value.length))
+      const selectionStart = editor.selectionStart
+      const selectionEnd = editor.selectionEnd
+      const direction = editor.selectionDirection
+      let changeLength = 0
+      if (op.kind === 'insert') {
+        changeLength = (op.text ?? '').length
+        editor.value = editor.value.slice(0, at) + (op.text ?? '') + editor.value.slice(at)
+      } else {
+        const end = Math.max(at, Math.min(at + (op.length ?? 0), editor.value.length))
+        changeLength = -(end - at)
+        editor.value = editor.value.slice(0, at) + editor.value.slice(end)
+      }
+      const moveOffset = (offset) => offset < at ? offset : Math.max(at, offset + changeLength)
+      editor.setSelectionRange(moveOffset(selectionStart), moveOffset(selectionEnd), direction)
+      last = editor.value
+      applyingRemote = false
+      syncState.textContent = 'Modification recue en direct'
+      updateStats()
+    })
+
+    function publishCursor() {
+      updateStats()
+      if (editor.disabled || !socket.connected || !activeRoom || cursorFrame) return
+      cursorFrame = requestAnimationFrame(() => {
+        cursorFrame = 0
+        const cursor = {
+          position: editor.selectionDirection === 'backward' ? editor.selectionStart : editor.selectionEnd,
+          selectionStart: editor.selectionStart,
+          selectionEnd: editor.selectionEnd,
+        }
+        socket.emit('cursor:move', cursor)
+        const self = members.get(selfId)
+        if (self) {
+          Object.assign(self, cursor)
+          renderMembers()
+        }
+      })
     }
+
+    editor.addEventListener('input', () => {
+      if (applyingRemote || editor.disabled || !activeRoom) return
+      const now = editor.value
+      const prefix = commonPrefix(last, now)
+      let suffix = 0
+      while (suffix < last.length - prefix && suffix < now.length - prefix &&
+        last[last.length - suffix - 1] === now[now.length - suffix - 1]) suffix++
+      const deletedLength = last.length - prefix - suffix
+      const insertedText = now.slice(prefix, now.length - suffix)
+      const operations = []
+      const generation = sessionGeneration
+      const docId = docSelect.value
+      if (deletedLength) operations.push({ kind: 'delete', offset: prefix, length: deletedLength, docId })
+      if (insertedText) operations.push({ kind: 'insert', offset: prefix, text: insertedText, docId })
+
+      last = now
+      syncState.textContent = 'Enregistrement…'
+      updateStats()
+      renderRemoteCursors()
+
+      operationQueue = operationQueue.then(async () => {
+        if (generation !== sessionGeneration || docId !== docSelect.value) return
+        for (const operation of operations) {
+          await new Promise((resolve, reject) => {
+            socket.timeout(5000).emit('op', operation, (timeoutError, ok, reason) => {
+              if (timeoutError || !ok) reject(new Error(reason ?? 'Operation non confirmee'))
+              else resolve()
+            })
+          })
+        }
+        if (generation !== sessionGeneration || docId !== docSelect.value) return
+        syncState.textContent = 'Toutes les modifications sont synchronisees'
+        publishCursor()
+      }).catch((error) => {
+        if (generation !== sessionGeneration || docId !== docSelect.value) return
+        addActivity(error.message)
+        sessionGeneration++
+        joinSelectedDocument()
+      })
+    })
+
+    editor.addEventListener('keyup', publishCursor)
+    editor.addEventListener('click', publishCursor)
+    editor.addEventListener('select', publishCursor)
+    editor.addEventListener('scroll', renderRemoteCursors)
+    docSelect.addEventListener('change', joinSelectedDocument)
+    profileSelect.addEventListener('change', () => signIn(profileSelect.value))
+    new ResizeObserver(renderRemoteCursors).observe(editor)
+
+    function commonPrefix(a, b) {
+      let index = 0
+      while (index < a.length && index < b.length && a[index] === b[index]) index++
+      return index
+    }
+
+    updateStats()
+    boot()
   </script>
 </body>
 </html>

@@ -1,6 +1,9 @@
 import type { ServerResponse } from 'node:http'
 import type { FastifyInstance } from 'fastify'
+import jwt from 'jsonwebtoken'
 import { createDocument, renderText, type Document } from './domain.ts'
+import { DEMO_PROFILES, findDemoProfile } from './profiles.ts'
+import { SECRET } from './realtime/security-helpers.ts'
 import type { ClientOp, Store } from './store.ts'
 
 interface SseEvent {
@@ -82,8 +85,24 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
   })
 
   app.get('/api/docs', async () =>
-    [...store.documents.values()].map((d) => ({ id: d.id, title: d.title })),
+    [...store.documents.values()].map((d) => ({
+      id: d.id,
+      title: d.title,
+      ownerId: d.ownerId,
+      collaboratorIds: d.collaboratorIds,
+    })),
   )
+
+  app.get('/api/profiles', async () => DEMO_PROFILES)
+
+  app.post('/api/auth/demo', async (req, reply) => {
+    const body = (req.body ?? {}) as { profileId?: string }
+    const profile = body.profileId ? findDemoProfile(body.profileId) : undefined
+    if (!profile) return reply.code(400).send({ error: 'profil inconnu' })
+
+    const token = jwt.sign({ sub: profile.id }, SECRET, { expiresIn: '4h' })
+    return { token, profile }
+  })
 
   app.get('/api/docs/:id', async (req, reply) => {
     const doc = store.documents.get((req.params as { id: string }).id)
