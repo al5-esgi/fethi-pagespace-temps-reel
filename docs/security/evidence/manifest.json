@@ -1,7 +1,7 @@
 {
-  "at": "2026-10-06T11:07:44.020445+00:00",
+  "at": "2026-10-06T11:22:43.337394+00:00",
   "beforeCommit": "cdc7fec",
-  "githubRunsVerified": false,
+  "githubRunsVerified": true,
   "measurements": {
     "before": {
       "npm": {
@@ -112,6 +112,9 @@
     }
   },
   "files": {
+    "github/sbom.cdx.json": "d370eea561bc22a0767737dfb62d828f10d5978cecfbc32d3a2f8c53dc493d9e",
+    "github/run-rouge.jpg": "7df56df076185fcaeb20027e8b1cb38237df40cc7604281a0884c75250b45976",
+    "github/run-vert.jpg": "dd29b8f142261527a5da4a7c36be3ef0a470896c668319356be25b71db396386",
     "before/npm-audit.json": "6a5cc08fb8cda0be024a10e5de3adb3f6ec754a48ebf76087f194ab447e07904",
     "before/osv.json": "a025dde35ef25386e706f97f79aceca1b08cf959d6b00fd2ff2ca4082ecec7ee",
     "before/trivy.json": "50b60877eb72be0a7798bbdbc62864e4ebff20e8734cb30f1cbcc0f98714945f",
@@ -147,5 +150,6 @@
     "regression/result.json": "c7f4511de5395e523bf78b8c542ce41977ba5a278f1e32933eb763c56e8158e1",
     "regression/semgrep.sarif": "4f5c38df38ed0fd8cc7d4256d8273655bf693fecf438ce3abe677d68c9c1297f",
     "regression/gitleaks.json": "b18807d1a5e156f131ec293aed851c1ff8f6069b36ae6f72f48aaf5be2d1278e"
-  }
+  },
+  "validatedSourceCommit": "f2754d526a0aee35c751b6021329cab197a82d9c"
 }

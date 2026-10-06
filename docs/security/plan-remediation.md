@@ -11,6 +11,6 @@ Plan produit volontairement pour soutenir le critère audit/ADR-2. Responsable d
 | R-05 | F-03 CSP, headers et Origin — P1 | Mainteneur | 06/10/2026 | 1 séance | Fait, ZAP et navigateur ; styles inline à revoir 06/11/2026 |
 | R-06 | F-04 dépendances, SBOM et image durcie — P1 | Mainteneur | 06/10/2026 | 1 séance | Fait localement, aucun HIGH/CRITICAL image ; suivi bases hebdomadaire |
 | R-07 | Auth réelle, TLS, ACL/TLS Redis et contrat hébergeur — P1 production | Futur responsable du service avec mainteneur | Avant toute exposition publique | À estimer selon hébergeur/IdP | Bloque l'ouverture publique ; périmètre actuel local fictif |
-| R-08 | Runs GitHub vert/rouge + finding Security + captures — soutenance | Mainteneur | Après autorisation de publication, avant passage | 30 min | Préparé, ne pas déclarer exécuté avant preuve |
+| R-08 | Runs GitHub vert/rouge + finding Security + captures — soutenance | Mainteneur | 06/10/2026, refaire avant passage | 30 min | Fait : vrais runs et findings vérifiés, captures dans evidence/github/ |
 
 Si une échéance glisse : réévaluer le périmètre/exposition, consigner raison et nouveau responsable/date. Aucun P0 ouvert ne peut être compensé par une belle présentation.

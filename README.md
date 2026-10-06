@@ -40,7 +40,7 @@ Les TP1 à TP5 de sécurité sont transposés à cet éditeur. Voir [le dossier 
 [l'audit](docs/security/rapport-audit.md) et [la matrice des grilles](docs/soutenance/grilles-et-preuves.md).
 `npm run test:security` vérifie les ACL REST/SSE, JWT, Origin WebSocket, expiration et seuils de scan.
 Les workflows couvrent SAST, secrets, dépendances, image et DAST, chacun avec un step de seuil explicite.
-Les vrais runs GitHub restent à publier après autorisation ; leur statut est dans `docs/security/preuves-ci.md`.
+Les vrais runs verts/rouges et findings Security sont référencés dans `docs/security/preuves-ci.md`.
 
 Pour le piège en direct, ouvrir les deux profils avec `&demo=1` : une commande retient les éditions
 afin de reproduire deux insertions concurrentes sur le même état, puis les libère. Une seconde commande

@@ -11,8 +11,8 @@
 - [x] Registre : traitements réels, finalités, bases envisagées, données, destinataires et durées actuelles/proposées distinguées.
 - [x] Points de conformité ouverts : registre et R-03/R-04/R-07. Aucune affirmation de conformité RGPD/NIS d'un service non défini.
 - [x] Tests et rapports locaux avant/après conservés : evidence/.
-- [ ] Runs GitHub exécutés et trouvables dans Security : autorisation de publication requise, preuves-ci.md.
-- [ ] Captures de run vert/rouge horodatées pour backup : après vrais runs, aucune capture inventée.
+- [x] Runs GitHub exécutés et findings Security vérifiés : preuves-ci.md, compte connecté requis pour la lecture dans le navigateur.
+- [x] Captures de vrais runs vert/rouge pour backup : evidence/github/, horodatages visibles et source officielle conservée.
 - [ ] Validation chronométrée de la soutenance commune et entraînement Q&A : à faire avec l'étudiant.
 
 Documents manquants externes, explicitement non faits : contrat d'hébergement/IdP, accord de sous-traitance, procédure d'incident de production, analyse d'applicabilité NIS2. Motif : projet pédagogique local, aucune organisation/service de production identifié. Les actions avant ouverture sont dans le plan ; ces absences ne sont pas masquées.

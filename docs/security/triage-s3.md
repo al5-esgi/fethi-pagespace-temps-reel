@@ -12,4 +12,4 @@ Le Semgrep historique exécuté avec les règles ciblées remonte la clé ; il n
 
 Les rapports `evidence/before/semgrep.sarif` et `gitleaks.json` conservent les preuves (valeur Gitleaks masquée). Les règles de crypto faible existent bien mais ne déclenchent aucun finding sur le code actuel : absence de SQL ou de hash de mot de passe faible dans cet éditeur.
 
-La régression synthétique de `npm run security:regression` permet de tester les deux scanners sans utiliser de vrai secret. Le run rouge GitHub reste à réaliser après autorisation de publication ; aucune capture de CI n'est simulée.
+La régression synthétique de `npm run security:regression` permet de tester les deux scanners sans utiliser de vrai secret. Le run rouge GitHub et les deux findings Security sont réellement exécutés et référencés dans preuves-ci.md ; captures authentiques dans evidence/github/.

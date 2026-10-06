@@ -1,24 +1,41 @@
-# Preuves CI et statut vérifié
+# Preuves CI vérifiées — Pagespace
 
-6 octobre 2026. Ne pas confondre un fichier de workflow présent avec un run réellement exécuté.
+6 octobre 2026. Dépôt : [al5-esgi/fethi-pagespace-temps-reel](https://github.com/al5-esgi/fethi-pagespace-temps-reel). Publication expressément autorisée par l'étudiant. [PR de sécurité #1](https://github.com/al5-esgi/fethi-pagespace-temps-reel/pull/1), branche `securite-tp1-tp5` ; non fusionnée dans main pour relecture.
 
-## Déjà vérifié localement
+## Nominal réellement vert
 
-- Typecheck et construction des sources.
-- 8 tests de sécurité (REST, création, SSE, JWT, Origin, expiration WS, headers, production).
-- 6 tests des seuils (chaque test vérifie vert, rouge, rapport invalide et rapport manquant).
-- TP temps réel 5/6 : 16 + 16 vérifications ; piège CRDT : convergence.
-- TP temps réel 7 : 15 vérifications inter-instances, dont fan-out, concurrence, SSE commun, reconnexion A → B et expiration unique.
-- npm, OSV, Semgrep et Gitleaks après qualification : zéro finding bloquant.
-- Trivy : aucun HIGH/CRITICAL sur l'image durcie mesurée ; LOW/MEDIUM conservés.
-- ZAP : scan exécuté sur sources corrigées, seuil vert ; rapports HTML/JSON/Markdown dans evidence/after.
+Source validée : `f2754d526a0aee35c751b6021329cab197a82d9c`.
 
-## À valider sur GitHub
+| Workflow | Résultat vérifié | Preuve |
+|---|---|---|
+| ci | Build/typecheck, sécurité et scénarios solo/cluster verts | [run CI](https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343323) |
+| sast | Semgrep + Gitleaks, seuils et SARIF verts | [run SAST](https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343359) |
+| supply-chain | npm + OSV, SBOM et image Trivy verts | [run supply-chain](https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343272) |
+| dast | ZAP sur les sources construites, rapport et seuil verts | [run DAST](https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343350) |
 
-La publication sur le dépôt public a été explicitement autorisée par l’étudiant le 6 octobre 2026. Les premiers runs sont en cours de préparation ; les liens ne sont pas encore des résultats validés.
+Les mêmes quatre workflows ont également passé sur la PR. Les artefacts téléchargeables sont listés dans leurs runs : `semgrep-sarif`, `gitleaks-redacted`, `dependency-reports`, `sbom-cyclonedx`, `trivy-image`, `zap-baseline-report`. Le SBOM GitHub a été téléchargé et vérifié : CycloneDX, 128 composants de production. Conservation des artefacts : 7 jours ; les copies/captures versionnées constituent le secours au-delà.
 
-Dépôt proposé : https://github.com/al5-esgi/fethi-pagespace-temps-reel
-Branche nominale : securite-tp1-tp5
-Publication proposée : code correctif, workflows/règles, tests et dossier de preuves avec données fictives, puis PR de relecture. Aucun .env, jeton réel, archive image ou node_modules.
+## Régression réellement rouge
 
-Après autorisation : enregistrer les vrais liens vers les runs verts, le run rouge sur branche de démonstration, le finding Security et les artefacts CycloneDX/ZAP/Trivy ; ajouter des captures horodatées. Tant que ces liens manquent, les critères « pipeline exécuté / démo live / Security » sont **préparés mais non acquis**. Aucun run ou finding de Juice Shop n'est une preuve Pagespace.
+Branche **à ne pas fusionner** : `demo/securite-regression-20261006`, commit `1db27c4ac94785bbf8f7d1a8b942a623cc4de230`. Fichier source de deux lignes, clé entièrement fictive, aucun compte/service associé.
+
+[Run rouge SAST et secrets](https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455345724) : seuls les deux steps suivants échouent en code 1, après production et publication des rapports :
+
+- **Seuil SAST - zero ERROR**, règle `semgrep.pagespace-hardcoded-jwt-secret`, CWE-798.
+- **Seuil secrets - zero secret non qualifie**, règle `pagespace-jwt-literal`.
+
+Les autres workflows de cette branche (CI, supply-chain et DAST) sont verts. La démo prouve le blocage ciblé, pas un incident d'archivage ni une panne de compilation.
+
+Findings réellement publiés, ligne 2 de `src/security-regression.ts` : [Semgrep #33](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/33) et [Gitleaks #32](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/32). Les détails et étapes ont aussi été vérifiés par l'API GitHub officielle et conservés dans `evidence/github/pipeline-results.json`.
+
+**Accès à préparer avant la soutenance** : se connecter à GitHub avec le compte ayant les droits sur le dépôt. Sans connexion, Security peut afficher 404 et les logs demandent Sign in. La branche par défaut reste main : filtrer les alertes sur la branche de démonstration ou ouvrir directement les deux liens ci-dessus. Ne pas confondre une vue sans droits/filtrée sur main avec l'absence de scan.
+
+## Captures et traces authentiques
+
+- `evidence/github/run-vert.jpg` et `run-rouge.jpg` : captures de vraies pages Actions, horodatage du run visible, pas des images reconstituées.
+- `evidence/github/pipeline-results.json` : états, SHA, dates, steps rouges et findings officiels.
+- `evidence/after/convergence-alice.jpg`, `convergence-johnny.jpg` et browser-proof.json : deux clients, même AXYB après éditions indépendantes.
+- Rapports bruts des cinq familles dans before/after ; tests de sécurité, seuils, présence/convergence et cluster ; production réelle : login demo/profiles/metrics 404, HSTS présent et utilisateur 65532.
+- `evidence/manifest.json` : empreintes SHA-256 des fichiers de preuve, sans normaliser les rapports bruts.
+
+Après toute modification fonctionnelle ou de politique : relancer les workflows du nouveau commit. Les preuves ci-dessus restent datées et rattachées à leur SHA ; elles ne prétendent pas valider des changements futurs.

@@ -17,7 +17,7 @@ Garder les services démarrés. Ouvrir deux navigateurs ou fenêtres distinctes 
 - A : http://localhost:3101/?profile=alice&demo=1
 - B : http://localhost:3102/?profile=demo-user&demo=1
 
-Préparer dépôt, Actions, un vrai run nominal vert et Security. Les liens et captures sont dans preuves-ci.md ; tant qu'ils ne sont pas renseignés, le volet GitHub n'est pas validé.
+Préparer dépôt, Actions, un vrai run nominal vert et Security. Les liens et captures sont dans preuves-ci.md ; ils ont été validés et sont à rouvrir avec un compte GitHub connecté avant le passage.
 
 ## 1. Nominal et droits
 
@@ -39,7 +39,7 @@ Cliquer **Coupure de 2 secondes** dans A : le transport est fermé, le statut pa
 
 La commande provoque une vraie fermeture du transport du client, puis une reprise programmée. Pour une panne réseau extérieure : utiliser le mode Offline des outils de développement du navigateur ; le désactiver avant le snapshot. Ne pas couper le Wi-Fi si cela coupe aussi l'accès GitHub pendant la démonstration CI.
 
-## 4. Pipeline qui casse — à réaliser après publication autorisée
+## 4. Pipeline qui casse — régression autorisée et validée sur GitHub
 
 Depuis la branche nominale propre, créer une **nouvelle** branche de démo pour chaque répétition, sans réécrire l'historique d'une branche utilisée par d'autres :
 
@@ -65,7 +65,7 @@ Ne pas afficher .env, les JWT, des identifiants réels ni le contenu d'un secret
 
 ## Backup
 
-Captures locales : `docs/security/evidence/after/convergence-*.jpg` et browser-proof.json. Captures GitHub vert/rouge : à prendre uniquement après vrais runs. Garder une vidéo/capture de la coupure si possible ; pas de capture reconstituée. Lancement raté : au plus 2 minutes de tentative, puis backup avec barème réduit conformément aux grilles.
+Captures locales : `docs/security/evidence/after/convergence-*.jpg` et browser-proof.json. Captures GitHub vert/rouge : prises sur les vrais runs dans evidence/github/. Garder une vidéo/capture de la coupure si possible ; pas de capture reconstituée. Lancement raté : au plus 2 minutes de tentative, puis backup avec barème réduit conformément aux grilles.
 
 ## Ordre oral proposé (10 minutes)
 

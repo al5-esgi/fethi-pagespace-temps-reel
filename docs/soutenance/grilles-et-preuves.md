@@ -10,7 +10,7 @@ Sources analysées : `~/Downloads/grille-soutenance.html` (Web temps réel) et `
 | Temps réel : robustesse | 2 | Redis partagé, snapshot/tombstones, ADR3, tests TP7 | Coupure réseau et reprise ; bascule A/B possible |
 | Temps réel : démarrage et 2 navigateurs | 2 | Compose image durcie, setup secret local, tests | Services déjà lancés ; démarrage <2 min et démo sans accroc |
 | Sécurité : threat model | 3 | DFD + STRIDE H reliées BE/ER | Montrer les frontières et expliquer 2–3 H spécifiques au canal |
-| Sécurité : pipeline et build cassé | 4 | 5 familles, seuils, parseurs testés | Vrai run nominal vert, régression synthétique, rouge au step de seuil, finding Security. Publication encore à autoriser |
+| Sécurité : pipeline et build cassé | 4 | 5 familles, seuils, parseurs testés | Vrai run nominal vert, régression synthétique, rouge au step de seuil, finding Security. Runs verts/rouge et findings vérifiés ; preuves-ci.md |
 | Sécurité : audit et ADR-2 | 3 | 5 findings, avant/après, CWE, SEC-2, plan | F-01 en premier ; critères, corrigé/restant et raison |
 | Sécurité : registre/SSI | 2 | Registre réel et checklist avec limites explicites | Durées réelles, conservation Redis ouverte, pas de conformité fictive |
 | Deux cours : Q&A | 8 + 8 | Entraînement préparé dans questions-reponses.md | Exactitude, justification et raisonnement ; 2 fondamentaux + 2 cas limites par grille |
