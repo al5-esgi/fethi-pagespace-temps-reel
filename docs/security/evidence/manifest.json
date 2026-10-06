@@ -114,6 +114,7 @@
   "files": {
     "github/sbom.cdx.json": "d370eea561bc22a0767737dfb62d828f10d5978cecfbc32d3a2f8c53dc493d9e",
     "github/run-rouge.jpg": "7df56df076185fcaeb20027e8b1cb38237df40cc7604281a0884c75250b45976",
+    "github/pipeline-results.json": "5dc85c776c9e62fee1cb66fe1f298d9b24da7001cc2e1f440939cc78c4b39c23",
     "github/run-vert.jpg": "dd29b8f142261527a5da4a7c36be3ef0a470896c668319356be25b71db396386",
     "before/npm-audit.json": "6a5cc08fb8cda0be024a10e5de3adb3f6ec754a48ebf76087f194ab447e07904",
     "before/osv.json": "a025dde35ef25386e706f97f79aceca1b08cf959d6b00fd2ff2ca4082ecec7ee",

@@ -1,0 +1,127 @@
+{
+  "at": "2026-10-06T11:24:18.243750+00:00",
+  "sourceCommit": "f2754d526a0aee35c751b6021329cab197a82d9c",
+  "green": [
+    {
+      "id": 37455343323,
+      "name": "ci",
+      "head_sha": "f2754d526a0aee35c751b6021329cab197a82d9c",
+      "head_branch": "securite-tp1-tp5",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343323",
+      "created_at": "2026-10-06T11:16:50Z",
+      "updated_at": "2026-10-06T11:17:42Z"
+    },
+    {
+      "id": 37455343359,
+      "name": "sast",
+      "head_sha": "f2754d526a0aee35c751b6021329cab197a82d9c",
+      "head_branch": "securite-tp1-tp5",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343359",
+      "created_at": "2026-10-06T11:16:50Z",
+      "updated_at": "2026-10-06T11:17:33Z"
+    },
+    {
+      "id": 37455343272,
+      "name": "supply-chain",
+      "head_sha": "f2754d526a0aee35c751b6021329cab197a82d9c",
+      "head_branch": "securite-tp1-tp5",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343272",
+      "created_at": "2026-10-06T11:16:50Z",
+      "updated_at": "2026-10-06T11:17:37Z"
+    },
+    {
+      "id": 37455343350,
+      "name": "dast",
+      "head_sha": "f2754d526a0aee35c751b6021329cab197a82d9c",
+      "head_branch": "securite-tp1-tp5",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455343350",
+      "created_at": "2026-10-06T11:16:50Z",
+      "updated_at": "2026-10-06T11:18:05Z"
+    }
+  ],
+  "red": {
+    "id": 37455345724,
+    "name": "sast",
+    "head_sha": "1db27c4ac94785bbf8f7d1a8b942a623cc4de230",
+    "head_branch": "demo/securite-regression-20261006",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/actions/runs/37455345724",
+    "created_at": "2026-10-06T11:16:51Z",
+    "updated_at": "2026-10-06T11:17:25Z"
+  },
+  "redFailureSteps": [
+    {
+      "job": "sast",
+      "steps": [
+        "Seuil SAST - zero ERROR"
+      ]
+    },
+    {
+      "job": "secret-detection",
+      "steps": [
+        "Seuil secrets - zero secret non qualifie"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "number": 34,
+      "rule": {
+        "id": "pagespace-jwt-literal",
+        "severity": "error",
+        "description": "pagespace-jwt-literal",
+        "name": "",
+        "tags": [],
+        "full_description": "",
+        "help": "",
+        "security_severity_level": "high"
+      },
+      "html_url": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/34",
+      "location": {
+        "path": "src/security-regression.ts",
+        "start_line": 2,
+        "end_line": 2,
+        "start_column": 1,
+        "end_column": 0
+      },
+      "ref": "refs/heads/demo/securite-regression-20261006",
+      "commit": "1db27c4ac94785bbf8f7d1a8b942a623cc4de230"
+    },
+    {
+      "number": 33,
+      "rule": {
+        "id": "semgrep.pagespace-hardcoded-jwt-secret",
+        "severity": "error",
+        "description": "Semgrep Finding: semgrep.pagespace-hardcoded-jwt-secret",
+        "name": "semgrep.pagespace-hardcoded-jwt-secret",
+        "tags": [
+          "CWE-798: Use of Hard-coded Credentials",
+          "HIGH CONFIDENCE",
+          "security"
+        ],
+        "full_description": "La cle JWT doit venir du secret de deploiement, jamais d'un literal.",
+        "help": "La cle JWT doit venir du secret de deploiement, jamais d'un literal.\n\n#### 💎 Enable cross-file analysis and Pro rules for free at <a href='https://sg.run/pro'>sg.run/pro</a>",
+        "security_severity_level": "critical"
+      },
+      "html_url": "https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/33",
+      "location": {
+        "path": "src/security-regression.ts",
+        "start_line": 2,
+        "end_line": 2,
+        "start_column": 8,
+        "end_column": 59
+      },
+      "ref": "refs/heads/demo/securite-regression-20261006",
+      "commit": "1db27c4ac94785bbf8f7d1a8b942a623cc4de230"
+    }
+  ]
+}

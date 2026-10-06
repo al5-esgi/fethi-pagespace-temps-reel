@@ -26,7 +26,7 @@ Branche **à ne pas fusionner** : `demo/securite-regression-20261006`, commit `1
 
 Les autres workflows de cette branche (CI, supply-chain et DAST) sont verts. La démo prouve le blocage ciblé, pas un incident d'archivage ni une panne de compilation.
 
-Findings réellement publiés, ligne 2 de `src/security-regression.ts` : [Semgrep #33](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/33) et [Gitleaks #32](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/32). Les détails et étapes ont aussi été vérifiés par l'API GitHub officielle et conservés dans `evidence/github/pipeline-results.json`.
+Findings réellement publiés, ligne 2 de `src/security-regression.ts` : [Semgrep #33](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/33) et [Gitleaks #34](https://github.com/al5-esgi/fethi-pagespace-temps-reel/security/code-scanning/34). Les détails et étapes ont aussi été vérifiés par l'API GitHub officielle et conservés dans `evidence/github/pipeline-results.json`.
 
 **Accès à préparer avant la soutenance** : se connecter à GitHub avec le compte ayant les droits sur le dépôt. Sans connexion, Security peut afficher 404 et les logs demandent Sign in. La branche par défaut reste main : filtrer les alertes sur la branche de démonstration ou ouvrir directement les deux liens ci-dessus. Ne pas confondre une vue sans droits/filtrée sur main avec l'absence de scan.
 
